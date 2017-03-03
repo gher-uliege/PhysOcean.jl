@@ -82,11 +82,12 @@ function solarflux(Q,al)
     Qs = Q*(1-al)
     return Qs
 end
-"""
-T degC
-e hPa
 
-Monteith and Unsworth (2008), https://en.wikipedia.org/wiki/Tetens_equation
+"""
+Compute vapour pressure of water at the temperature `T` (degree Celsius) in hPa using Tetens equations.
+The temperature must be postive.
+
+Monteith, J.L., and Unsworth, M.H. 2008. Principles of Environmental Physics. Third Ed. AP, Amsterdam. http://store.elsevier.com/Principles-of-Environmental-Physics/John-Monteith/isbn-9780080924793
 """
 
 function vaporpressure(T)
@@ -131,6 +132,6 @@ function gaussfilter(vbe,param)
 end
 
 
-export nanmean, nansum, gausswin, vaporpressure, solarflux, sensibleflux, gaussfilter, longwaveflux, latentflux, datetime_matlab
+export nanmean, nansum, gausswin, vaporpressure, solarflux, sensibleflux, gaussfilter, longwaveflux, latentflux, datetime_matlab, freezing_temperature
 
 end
