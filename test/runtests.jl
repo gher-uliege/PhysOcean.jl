@@ -20,9 +20,9 @@ using Base.Test
     pa = 1000
 
     # reference value from original matlab code
-    @test_approx_eq_eps latentflux(r,Ta,Ts,w,pa)    -2.657651368068170e+02 1
-    @test_approx_eq_eps longwaveflux(Ts,Ta,e,tcc)   -0.002148779943231 1 
-    @test_approx_eq_eps sensibleflux(w,Ts,Ta)    -1.885000000000000e+02 1
+    @test_approx_eq_eps latentflux(r,Ta,Ts,w,pa)    -265 1
+    @test_approx_eq_eps longwaveflux(Ts,Ta,e,tcc)   -2.980503192476682  1
+    @test_approx_eq_eps sensibleflux(w,Ts,Ta)       -188.5 1
 
     Q = 1000.
     al = 1.

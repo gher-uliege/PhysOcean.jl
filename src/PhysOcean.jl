@@ -8,6 +8,8 @@
 
 module PhysOcean
 
+# temperature in Kelvin of 0 degree Celsius
+const TK = 273.15
 
 function nansum(x)
     return sum(x[!isnan.(x)])
@@ -26,6 +28,9 @@ function datetime_matlab(datenum)
 end
 
 
+"""
+Compute the freezing temperature (in degree Celsius) of sea-water based on the salinity `S` (psu).
+"""
 freezing_temperature(S) = (-0.0575 + 1.710523e-3 * sqrt(S) - 2.154996e-4 * S) * S
 
 
@@ -58,6 +63,11 @@ function longwaveflux(Ts,Ta,e,tcc)
     sigma = 5.67e-8;
     lambda = 0.69;
 
+    # degree C to degree K
+    Ts = Ts + TK
+    Ta = Ta + TK
+
+    @show Ts
     Qb = epsilon * sigma  * Ts^4 * (0.39-0.05*e^(1/2))*(1-lambda*tcc.^2)+4 * epsilon * sigma * Ts^3 *(Ts-Ta)
 
     return Qb
