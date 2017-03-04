@@ -39,4 +39,13 @@ using Base.Test
 
     # gaussfilter should reduce a peak
     @test all(gaussfilter([0,0,0,1,0,0,0],2) .< 1)
+
+    # pure water
+    @test density(0,10,0) ≈ 9.997018700984376e+02
+
+    @test density(35,10,0) ≈ 1.026952000476324e+03
+    @test density(35,10,1000) ≈ 1.031430065478789e+03
+
+    @test secant_bulk_modulus(35,10,0) ≈ 2.269535808268893e+04
+    @test secant_bulk_modulus(35,10,1000) ≈ 2.303294089994505e+04
 end

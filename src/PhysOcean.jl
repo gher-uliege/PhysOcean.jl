@@ -1,7 +1,7 @@
 #
 # Collections of tools for physical oceanography
 
-# Authors: 
+# Authors:
 # Aida Alvera Azcarate
 # Alexander Barth
 
@@ -21,25 +21,169 @@ end
 
 
 """
-Return DateTime from matlab's and octave's datenum 
+    datetime_matlab(datenum)
+
+Return DateTime from matlab's and octave's datenum
 """
-function datetime_matlab(datenum)    
+function datetime_matlab(datenum)
     return DateTime(1970,1,1) + Dates.Millisecond(round(Int,(datenum-719529) *24*60*60*1000))
 end
 
 
 """
+    temperature68(T)
+
+Convert temperature ITS-90 to IPTS-68 following Saunders, 1990.
+
+Saunders, P.M. 1990, The International Temperature Scale of 1990, ITS-90. No.10, p.10.
+https://web.archive.org/web/20170304194831/http://webapp1.dlib.indiana.edu/virtual_disk_library/index.cgi/4955867/FID474/wocedocs/newsltr/news10/news10.pdf
+"""
+
+temperature68(T) = 1.00024 * T
+
+"""
+density of pure water at the temperature `T` (degree Celsius, ITS-90)
+"""
+function density_reference_pure_water(T)
+
+    T68 = temperature68(T)
+
+    # page 21, equation 14 of
+    # http://web.archive.org/web/20170103000527/http://unesdoc.unesco.org/images/0005/000598/059832eb.pdf
+
+    a0 = 999.842594 # why [-28.263737]
+    a1 = 6.793952e-2
+    a2 = -9.095290e-3
+    a3 = 1.001685e-4
+    a4 = -1.120083e-6
+    a5 = 6.536332e-9
+
+    ρ_w = a0 + (a1 + (a2 + (a3 + (a4 + a5 * T68) * T68) * T68) * T68) * T68
+    return ρ_w
+end
+
+function density0(S,T)
+    t = temperature68(T)
+    # page 21, equation (13) of
+    # http://web.archive.org/web/20170103000527/http://unesdoc.unesco.org/images/0005/000598/059832eb.pdf
+
+    b0 = 8.24493e-1
+    b1 = -4.0899e-3
+    b2 = 7.6438e-5
+    b3 = -8.2467e-7
+    b4 = 5.3875e-9
+    c0 = -5.72466e-3
+    c1 = 1.0227e-4
+    c2 = -1.6546e-6
+    d0 = 4.8314e-4
+
+    ρ = density_reference_pure_water(T) + ((b0 + (b1 + (b2 + (b3 + b4 * t) * t) * t) * t) + (c0 + (c1 + c2 * t) * t) * sqrt(S) + d0 * S) * S;
+    return ρ
+end
+
+
+"""
+    density(S,T,p)
+
+Compute the density of sea-water (kg/m³) at the salinity `S` (psu, PSS-78), temperature `T` (degree Celsius, ITS-90) and pressure `p` (decibar).
+"""
+
+function density(S,T,p)
+    ρ = density0(S,T)
+
+    if (p == 0)
+        return ρ
+    end
+
+    K = secant_bulk_modulus(S,T,p)
+    # convert decibars to bars
+    p = p/10
+    return ρ / (1 - p/K)
+end
+
+
+"""
+    secant_bulk_modulus(S,T,p)
+
+Compute the secant bulk modulus of sea-water (bars) at the salinity `S` (psu, PSS-78), temperature `T` (degree Celsius, ITS-90) and pressure `p` (decibar).
+"""
+
+function secant_bulk_modulus(S,T,p)
+    # convert decibars to bars
+    p = p/10
+
+    t = temperature68(T)
+
+    # page 18, equation (19)
+    e0 = +19652.21 # [-1930.06]
+    e1 = +148.4206
+    e2 = -2.327105
+    e3 = +1.360477E-2
+    e4 = -5.155288E-5
+    Kw = e0 + e1 * t + e2 * t^2 + e3 * t^3 + e4 * t^4
+
+    # page 18, equation (16)
+    # probably typo f3 vs f2
+    f0 = +54.6746;    g0 = +7.944E-2
+    f1 = -0.603459;   g1 = +1.6483E-2
+    f2 = +1.09987E-2; g2 = -5.3009E-4
+    f3 = -6.1670E-5
+
+    K0 = Kw + (f0 + f1 * t + f2 * t^2 + f3 * t^3) * S + (g0 + g1*t + g2*t^2) * S * sqrt(S)
+
+    if (p == 0)
+        return K0
+    end
+
+    # page 19
+    h0 = +3.239908 # [-0.1194975]
+    h1 = +1.43713E-3
+    h2 = +1.16092E-4
+    h3 = -5.77905E-7
+    Aw = h0 + h1 * t + h2 * t^2 + h3 * t^3
+
+
+    k0 = +8.50935E-5 # [+ 3.47718E-5]
+    k1 = -6.12293E-6
+    k2 = +5.2787E-8
+    Bw = k0 + k1 * t + k2 * t^2
+
+    # page 18, equation (17)
+    i0 = +2.2838E-3; j0 = +1.91075E-4
+    i1 = -1.0981E-5
+    i2 = -1.6078E-6
+    A = Aw + (i0 + i1 * t + i2 * t^2 ) * S + j0 * S*sqrt(S)
+
+    # page 18, equation (18)
+    m0 = -9.9348E-7
+    m1 = +2.0816E-8
+    m2 = +9.1697E-10
+    B = Bw + (m0 + m1 * t + m2 * t * t) * S
+
+    K = K0 + A * p + B * p^2
+
+    return K
+end
+
+
+
+"""
+    freezing_temperature(S)
+
 Compute the freezing temperature (in degree Celsius) of sea-water based on the salinity `S` (psu).
 """
 freezing_temperature(S) = (-0.0575 + 1.710523e-3 * sqrt(S) - 2.154996e-4 * S) * S
 
 
+"""
+    latentflux(r,Ta,Ts,w,pa)
+
+Compute the latent heat flux (W/m²) using the relative humidity `r` (0 ≤ r ≤ 1, pressure ratio, not percentage),
+the air temperature `Ta` (degree Celsius), the sea surface temperature `Ts` (degree Celsius), the
+wind speed `w` (m/s) and the air pressure (hPa).
+"""
 function latentflux(r,Ta,Ts,w,pa)
 
-    #pa hPa
-    #w m/s
-    #  Ta, Ts degC
-    #r unitless
 
     Da = 1.5e-3;
     rhoa = 1.3; # kg m-3
@@ -58,6 +202,13 @@ function latentflux(r,Ta,Ts,w,pa)
     return Qe
 end
 
+"""
+    longwaveflux(Ts,Ta,e,tcc)
+
+Compute the long wave heat flux (W/m²) using
+the air temperature `Ta` (degree Celsius), the sea surface temperature `Ts` (degree Celsius),
+the wate vapour pressure `e` (hPa) and the total cloud coverage `ttc` (0 ≤ tcc ≤ 1).
+"""
 function longwaveflux(Ts,Ta,e,tcc)
     epsilon = 0.98;
     sigma = 5.67e-8;
@@ -73,6 +224,14 @@ function longwaveflux(Ts,Ta,e,tcc)
     return Qb
 end
 
+"""
+    sensibleflux(w,Ts,Ta)
+
+Compute the sensible heat flux (W/m²) using
+the wind speed `w` (m/s),
+the sea surface temperature `Ts` (degree Celsius),
+the air temperature `Ta` (degree Celsius).
+"""
 function sensibleflux(w,Ts,Ta)
     Sta = 1.45e-3;
     ca = 1000;
@@ -82,10 +241,11 @@ function sensibleflux(w,Ts,Ta)
 
     return Qc
 end
+
 """
-solarflux(Q,al)
+    solarflux(Q,al)
 
-
+Compute the solar heat flux (W/m²)
 """
 
 function solarflux(Q,al)
@@ -94,6 +254,8 @@ function solarflux(Q,al)
 end
 
 """
+    vaporpressure(T)
+
 Compute vapour pressure of water at the temperature `T` (degree Celsius) in hPa using Tetens equations.
 The temperature must be postive.
 
@@ -102,7 +264,7 @@ Monteith, J.L., and Unsworth, M.H. 2008. Principles of Environmental Physics. Th
 
 function vaporpressure(T)
     # Monteith and Unsworth (2008), https://en.wikipedia.org/wiki/Tetens_equation
-    e = 6.1078* exp((17.27.*T)./(T+237.3));
+    e = 6.1078 * exp((17.27 * T)./(T + 237.3));
     return e
 end
 
@@ -129,19 +291,19 @@ function gaussfilter(vbe,param)
 
     s=1;
 
-    for i=1:imax                
+    for i=1:imax
         Filt[i] = sum(vbe[s:s+param-1].*c);
-                
+
         s = s+1;
         if s>=size(vbe,1)-param
-            s=size(vbe,1)-param;            
-        end                
+            s=size(vbe,1)-param;
+        end
     end
-            
+
     return Filt
 end
 
 
-export nanmean, nansum, gausswin, vaporpressure, solarflux, sensibleflux, gaussfilter, longwaveflux, latentflux, datetime_matlab, freezing_temperature
+export nanmean, nansum, gausswin, vaporpressure, solarflux, sensibleflux, gaussfilter, longwaveflux, latentflux, datetime_matlab, freezing_temperature, density, secant_bulk_modulus
 
 end
