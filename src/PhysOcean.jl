@@ -176,13 +176,16 @@ freezing_temperature(S) = (-0.0575 + 1.710523e-3 * sqrt(S) - 2.154996e-4 * S) * 
 
 
 """
-    latentflux(r,Ta,Ts,w,pa)
+    latentflux(Ts,Ta,r,w,pa)
 
-Compute the latent heat flux (W/m²) using the relative humidity `r` (0 ≤ r ≤ 1, pressure ratio, not percentage),
-the air temperature `Ta` (degree Celsius), the sea surface temperature `Ts` (degree Celsius), the
-wind speed `w` (m/s) and the air pressure (hPa).
+Compute the latent heat flux (W/m²) using
+the sea surface temperature `Ts` (degree Celsius),
+the air temperature `Ta` (degree Celsius),
+the relative humidity `r` (0 ≤ r ≤ 1, pressure ratio, not percentage),
+the wind speed `w` (m/s)
+and the air pressure (hPa).
 """
-function latentflux(r,Ta,Ts,w,pa)
+function latentflux(Ts,Ta,r,w,pa)
 
 
     Da = 1.5e-3;
@@ -206,7 +209,8 @@ end
     longwaveflux(Ts,Ta,e,tcc)
 
 Compute the long wave heat flux (W/m²) using
-the air temperature `Ta` (degree Celsius), the sea surface temperature `Ts` (degree Celsius),
+the sea surface temperature `Ts` (degree Celsius),
+the air temperature `Ta` (degree Celsius),
 the wate vapour pressure `e` (hPa) and the total cloud coverage `ttc` (0 ≤ tcc ≤ 1).
 """
 function longwaveflux(Ts,Ta,e,tcc)
@@ -218,21 +222,21 @@ function longwaveflux(Ts,Ta,e,tcc)
     Ts = Ts + TK
     Ta = Ta + TK
 
-    @show Ts
-    Qb = epsilon * sigma  * Ts^4 * (0.39-0.05*e^(1/2))*(1-lambda*tcc.^2)+4 * epsilon * sigma * Ts^3 *(Ts-Ta)
+    Qb = epsilon * sigma  * Ts^4 * (0.39-0.05*sqrt(e))*(1-lambda*tcc^2)+4 * epsilon * sigma * Ts^3 *(Ts-Ta)
 
     return Qb
 end
 
 """
-    sensibleflux(w,Ts,Ta)
+    sensibleflux(Ts,Ta,w)
 
 Compute the sensible heat flux (W/m²) using
 the wind speed `w` (m/s),
 the sea surface temperature `Ts` (degree Celsius),
 the air temperature `Ta` (degree Celsius).
 """
-function sensibleflux(w,Ts,Ta)
+
+function sensibleflux(Ts,Ta,w)
     Sta = 1.45e-3;
     ca = 1000;
     rhoa = 1.3;
@@ -292,7 +296,7 @@ function gaussfilter(vbe,param)
     s=1;
 
     for i=1:imax
-        Filt[i] = sum(vbe[s:s+param-1].*c);
+        Filt[i] = sum(vbe[s:s+param-1] .* c);
 
         s = s+1;
         if s>=size(vbe,1)-param
