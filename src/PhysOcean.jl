@@ -33,7 +33,7 @@ end
 """
     temperature68(T)
 
-Convert temperature ITS-90 to IPTS-68 following Saunders, 1990.
+Convert temperature `T` from ITS-90 scale to the IPTS-68 scale following Saunders, 1990.
 
 Saunders, P.M. 1990, The International Temperature Scale of 1990, ITS-90. No.10, p.10.
 https://web.archive.org/web/20170304194831/http://webapp1.dlib.indiana.edu/virtual_disk_library/index.cgi/4955867/FID474/wocedocs/newsltr/news10/news10.pdf
@@ -46,7 +46,7 @@ density of pure water at the temperature `T` (degree Celsius, ITS-90)
 """
 function density_reference_pure_water(T)
 
-    T68 = temperature68(T)
+    t = temperature68(T)
 
     # page 21, equation 14 of
     # http://web.archive.org/web/20170103000527/http://unesdoc.unesco.org/images/0005/000598/059832eb.pdf
@@ -58,7 +58,7 @@ function density_reference_pure_water(T)
     a4 = -1.120083e-6
     a5 = 6.536332e-9
 
-    ρ_w = a0 + (a1 + (a2 + (a3 + (a4 + a5 * T68) * T68) * T68) * T68) * T68
+    ρ_w = a0 + (a1 + (a2 + (a3 + (a4 + a5 * t) * t) * t) * t) * t
     return ρ_w
 end
 
@@ -85,7 +85,10 @@ end
 """
     density(S,T,p)
 
-Compute the density of sea-water (kg/m³) at the salinity `S` (psu, PSS-78), temperature `T` (degree Celsius, ITS-90) and pressure `p` (decibar).
+Compute the density of sea-water (kg/m³) at the salinity `S` (psu, PSS-78), temperature `T` (degree Celsius, ITS-90) and pressure `p` (decibar) using the UNESCO 1983 polynomial.
+
+Fofonoff, N.P.; Millard, R.C. (1983). Algorithms for computation of fundamental properties of seawater. UNESCO Technical Papers in Marine Science, No. 44. UNESCO: Paris. 53 pp.
+http://web.archive.org/web/20170103000527/http://unesdoc.unesco.org/images/0005/000598/059832eb.pdf
 """
 
 function density(S,T,p)
@@ -105,7 +108,10 @@ end
 """
     secant_bulk_modulus(S,T,p)
 
-Compute the secant bulk modulus of sea-water (bars) at the salinity `S` (psu, PSS-78), temperature `T` (degree Celsius, ITS-90) and pressure `p` (decibar).
+Compute the secant bulk modulus of sea-water (bars) at the salinity `S` (psu, PSS-78), temperature `T` (degree Celsius, ITS-90) and pressure `p` (decibar) using the UNESCO polynomial 1983.
+
+Fofonoff, N.P.; Millard, R.C. (1983). Algorithms for computation of fundamental properties of seawater. UNESCO Technical Papers in Marine Science, No. 44. UNESCO: Paris. 53 pp.
+http://web.archive.org/web/20170103000527/http://unesdoc.unesco.org/images/0005/000598/059832eb.pdf
 """
 
 function secant_bulk_modulus(S,T,p)
