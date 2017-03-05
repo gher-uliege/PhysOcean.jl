@@ -158,9 +158,9 @@ function secant_bulk_modulus(S,T,p)
     m0 = -9.9348E-7
     m1 = +2.0816E-8
     m2 = +9.1697E-10
-    B = Bw + (m0 + m1 * t + m2 * t * t) * S
+    B = Bw + (m0 + (m1 + m2 * t) * t) * S
 
-    K = K0 + A * p + B * p^2
+    K = K0 + (A + B * p) * p
 
     return K
 end
