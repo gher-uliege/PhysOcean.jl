@@ -120,7 +120,7 @@ function secant_bulk_modulus(S,T,p)
     e2 = -2.327105
     e3 = +1.360477E-2
     e4 = -5.155288E-5
-    Kw = e0 + e1 * t + e2 * t^2 + e3 * t^3 + e4 * t^4
+    Kw = e0 + (e1  + (e2 + (e3  + e4 * t) * t) * t) * t
 
     # page 18, equation (16)
     # probably typo f3 vs f2
@@ -129,7 +129,7 @@ function secant_bulk_modulus(S,T,p)
     f2 = +1.09987E-2; g2 = -5.3009E-4
     f3 = -6.1670E-5
 
-    K0 = Kw + (f0 + f1 * t + f2 * t^2 + f3 * t^3) * S + (g0 + g1*t + g2*t^2) * S * sqrt(S)
+    K0 = Kw + ((f0 + (f1 + (f2  + f3 * t) * t) * t) + (g0 + (g1 + g2 * t) * t) * sqrt(S)) * S
 
     if (p == 0)
         return K0
@@ -140,19 +140,19 @@ function secant_bulk_modulus(S,T,p)
     h1 = +1.43713E-3
     h2 = +1.16092E-4
     h3 = -5.77905E-7
-    Aw = h0 + h1 * t + h2 * t^2 + h3 * t^3
+    Aw = h0 + (h1 + (h2 + h3 * t) * t) * t
 
 
     k0 = +8.50935E-5 # [+ 3.47718E-5]
     k1 = -6.12293E-6
     k2 = +5.2787E-8
-    Bw = k0 + k1 * t + k2 * t^2
+    Bw = k0 + (k1 + k2 * t) * t
 
     # page 18, equation (17)
     i0 = +2.2838E-3; j0 = +1.91075E-4
     i1 = -1.0981E-5
     i2 = -1.6078E-6
-    A = Aw + (i0 + i1 * t + i2 * t^2 ) * S + j0 * S*sqrt(S)
+    A = Aw + ((i0 + (i1 + i2 * t) * t) + j0 * sqrt(S)) * S
 
     # page 18, equation (18)
     m0 = -9.9348E-7
