@@ -279,38 +279,40 @@ function vaporpressure(T)
 end
 
 
-# Implementation from the documentation at
-# https://nl.mathworks.com/help/signal/ref/gausswin.html
+"""
+    gausswin(N, α = 2.5)
 
+Return a Gaussian window with `N` points with a standard deviation of 
+(N-1)/(2 α).
+"""
 function gausswin(N, α = 2.5)
     sigma = (N-1)/(2 * α)
-    return [exp(- n^2 / (2*sigma^2)) for n = -(N-1)/2: (N-1)/2]
+    return [exp(- n^2 / (2*sigma^2)) for n = -(N-1)/2:(N-1)/2]
 end
 
+"""
+    gaussfilter(x,N)
 
-function gaussfilter(vbe,param)
-    #param=6 for hourly to hourly
-    #param=36 for 10-minute to 6-hourly
+Filter the vector `x` with a `N`-point Gaussian window.
+"""
 
-    b = gausswin(param);
+function gaussfilter(x,N)
+    b = gausswin(N);
     c = b/sum(b);
-
-    imax = size(vbe,1);
-
-    Filt = zeros(imax)
-
+    imax = size(x,1);
+    xf = zeros(imax)
     s=1;
 
     for i=1:imax
-        Filt[i] = sum(vbe[s:s+param-1] .* c);
+        xf[i] = sum(x[s:s+N-1] .* c);
 
         s = s+1;
-        if s>=size(vbe,1)-param
-            s=size(vbe,1)-param;
+        if s>=size(x,1)-N
+            s=size(x,1)-N;
         end
     end
 
-    return Filt
+    return xf
 end
 
 
