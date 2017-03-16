@@ -16,7 +16,7 @@ Inside Julia, you can download and install the package by issuing:
 Pkg.clone("https://github.com/gher-ulg/PhysOcean.jl")
 ```
 
-Or if you want to use the latest version, you the following command:
+Or if you want to use the latest version, you can use the following command:
 
 ```julia
 Pkg.add("PhysOcean")
