@@ -13,13 +13,13 @@ Your need [Julia](http://julialang.org) to use `PhysOcean`. The command line ver
 Inside Julia, you can download and install the package by issuing:
 
 ```julia
-Pkg.clone("https://github.com/gher-ulg/PhysOcean.jl")
+Pkg.add("PhysOcean")
 ```
 
 Or if you want to use the latest version, you can use the following command:
 
 ```julia
-Pkg.add("PhysOcean")
+Pkg.clone("https://github.com/gher-ulg/PhysOcean.jl")
 ```
 
 # Testing
