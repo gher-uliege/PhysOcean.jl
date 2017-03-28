@@ -48,4 +48,9 @@ using Base.Test
 
     @test secant_bulk_modulus(35,10,0) ≈ 2.269535808268893e+04
     @test secant_bulk_modulus(35,10,1000) ≈ 2.303294089994505e+04
+
+    # load CastAway file
+    filename = joinpath(dirname(@__FILE__),"20160622_0747_TC100.csv")
+    data,header,metadata = loadcastaway(filename)
+    @test data[1,end] ≈ 1026.4925224486576
 end
