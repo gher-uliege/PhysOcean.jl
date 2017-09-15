@@ -12,11 +12,25 @@ module PhysOcean
 const TK = 273.15
 
 function nansum(x)
-    return sum(x[!isnan.(x)])
+    return sum(x[.!isnan.(x)])
+end
+
+function nansum(x,dim)
+    m = isnan.(x)
+    x2 = copy(x)
+    x2[m] = 0
+    return sum(x2,dim)
 end
 
 function nanmean(x)
-    return mean(x[!isnan.(x)])
+    return mean(x[.!isnan.(x)])
+end
+
+function nanmean(x,dim)
+    m = isnan.(x)
+    x2 = copy(x)
+    x2[m] = 0
+    return sum(x2,dim) ./ sum(.!m,dim)
 end
 
 
