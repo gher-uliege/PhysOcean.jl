@@ -40,7 +40,9 @@ end
 Return DateTime from matlab's and octave's datenum
 """
 function datetime_matlab(datenum)
-    return DateTime(1970,1,1) + Dates.Millisecond(round(Int64,(datenum-719529) *24*60*60*1000))
+    # even if datenum is Int32, the computations must be done with Int64 to
+    # prevent overflow
+    return DateTime(1970,1,1) + Dates.Millisecond(round(Int64,(datenum-Int64(719529)) * 24*60*60*1000))
 end
 
 
