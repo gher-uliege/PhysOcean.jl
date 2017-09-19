@@ -22,7 +22,7 @@ function loadcastaway(stream::IOStream)
 
     headerfound = false
     j = 1
-    data = Array{Float64,2}()
+    data = Array{Float64,2}(0,0)
     header = ""
 
     for i = 1:length(lines)

@@ -9,7 +9,7 @@ using Base.Test
 
     @test datetime_matlab(730486) == DateTime(2000,1,1)
 
-    @test_approx_eq_eps freezing_temperature(35) -1.9 0.1
+    @test freezing_temperature(35) ≈ -1.9 atol=0.1
 
     Ts = 10
     Ta = 20
@@ -20,9 +20,9 @@ using Base.Test
     pa = 1000
 
     # reference value from original matlab code
-    @test_approx_eq_eps latentflux(Ts,Ta,r,w,pa)    -265 1
-    @test_approx_eq_eps longwaveflux(Ts,Ta,e,tcc)   -2.980503192476682  1
-    @test_approx_eq_eps sensibleflux(Ts,Ta,w)       -188.5 1
+    @test latentflux(Ts,Ta,r,w,pa)   ≈ -265 atol=1
+    @test longwaveflux(Ts,Ta,e,tcc)  ≈ -2.980503192476682  atol=0.01
+    @test sensibleflux(Ts,Ta,w)      ≈ -188.5 atol=1
 
     Q = 1000.
     al = 1.
@@ -30,7 +30,7 @@ using Base.Test
 
 
     # reference value from https://en.wikipedia.org/w/index.php?title=Vapour_pressure_of_water&oldid=767455276
-    @test_approx_eq_eps vaporpressure(10) 12.281 0.01
+    @test vaporpressure(10) ≈ 12.281 atol=0.01
 
     # gausswin should be symmetric
     gw = gausswin(3)
