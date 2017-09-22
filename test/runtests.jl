@@ -7,6 +7,9 @@ using Base.Test
     @test nansum([NaN,1.,2.]) ≈ 3
     @test nanmean([NaN,1.,2.]) ≈ 1.5
 
+    @test nansum([NaN 1.; 2. 4.],1) ≈ [2. 5.]
+    @test nanmean([NaN 1.; 2. 4.],1) ≈ [2. 2.5]
+    
     @test datetime_matlab(730486) == DateTime(2000,1,1)
 
     @test freezing_temperature(35) ≈ -1.9 atol=0.1
