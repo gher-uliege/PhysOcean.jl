@@ -49,3 +49,9 @@ gausswin(N, α = 2.5)
 ```@docs
 gaussfilter(x,N)
 ```
+
+
+# Data download
+```@docs
+CMEMS.download
+```

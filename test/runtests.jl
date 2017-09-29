@@ -56,4 +56,6 @@ using Base.Test
     filename = joinpath(dirname(@__FILE__),"20160622_0747_TC100.csv")
     data,header,metadata = loadcastaway(filename)
     @test data[1,end] ≈ 1026.4925224486576
+
+    include("test_cmems.jl")
 end
