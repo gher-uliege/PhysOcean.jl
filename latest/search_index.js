@@ -112,4 +112,20 @@ var documenterSearchIndex = {"docs": [
     "text": "gausswin(N, α = 2.5)gaussfilter(x,N)"
 },
 
+{
+    "location": "index.html#PhysOcean.CMEMS.download",
+    "page": "Sea-water properties",
+    "title": "PhysOcean.CMEMS.download",
+    "category": "Function",
+    "text": "CMEMS.download(lonr,latr,timerange,param,username,password,basedir[; indexURLs = ...])\n\nDownload in situ data within the longitude range lonr (an array or tuple with  two elements: the minimum longitude and the maximum longitude), the latitude range latr (likewise), time range timerange (an array or tuple with two DateTime  structures: the starting date and the end date) from the CMEMS (Copernicus Marine environment monitoring service) in situ service [1].   param is one of the parameter codes as defined in [2] or [3]. username and password are the credentials to access data [1] and basedir  is the directory under which the data is saved. indexURLs is a list of the URL to the index_history.txt file. Per default, it includes the URLs of the Baltic, Arctic, North West Shelf, Iberian, Mediteranean and Black Sea Thematic  Assembly Center.\n\nAs these URLs might change, the latest version of the URLs to the indexes can be obtained at [1].\n\nExample\n\njulia> username = \"...\"\njulia> password = \"...\"\njulia> lonr = [7.6, 12.2]\njulia> latr = [42, 44.5]\njulia> timerange = [DateTime(2016,5,1),DateTime(2016,8,1)]\njulia> param = \"TEMP\"\njulia> basedir = \"/tmp\"\njulia> files = CMEMS.download(lonr,latr,timerange,param,username,password,basedir)\n\n[1]: http://marine.copernicus.eu/\n\n[2]: http://www.coriolis.eu.org/Documentation/General-Informations-on-Data/Codes-Tables\n\n[3]: https://web.archive.org/web/20140521170325/http://www.ifremer.fr:80/co/co050117/coriolis_parameters/coriolis_parameters.xls\n\n\n\n"
+},
+
+{
+    "location": "index.html#Data-download-1",
+    "page": "Sea-water properties",
+    "title": "Data download",
+    "category": "section",
+    "text": "CMEMS.download"
+},
+
 ]}
