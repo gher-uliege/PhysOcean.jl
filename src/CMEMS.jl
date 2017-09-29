@@ -75,7 +75,7 @@ function download(lonr,latr,timerange,param,username,password,basedir;
         return localname
     end
 
-    const dateformat = DateFormat("y-m-dTH:M:S\Z")
+    const dateformat = DateFormat("y-m-dTH:M:SZ")
     files = String[]
     
     for indexURL in indexURLs
