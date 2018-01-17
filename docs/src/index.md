@@ -54,4 +54,5 @@ gaussfilter(x,N)
 # Data download
 ```@docs
 CMEMS.download
+CMEMS.load
 ```
