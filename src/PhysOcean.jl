@@ -7,6 +7,7 @@
 
 
 module PhysOcean
+import divand
 
 # temperature in Kelvin of 0 degree Celsius
 const TK = 273.15
@@ -331,8 +332,38 @@ function gaussfilter(x,N)
     return xf
 end
 
+
 include("CMEMS.jl")
 export CMEMS
+
+
+"""
+    meof(masks,vars; nsv = 20)
+Compute `nsv` multivariate EOFs. `masks` and `vars` are tuples.
+"""
+function meof(masks,vars; nsv = 20)
+    sv = divand.statevector(masks)
+
+
+    X = divand.packens(sv,vars);
+    
+    Xm = mean(X,2);
+    Xp = X .- Xm;
+    #@show mean(Xp,2)       
+    
+    S = svds(Xp; nsv = nsv);
+    eofs = divand.unpackens(sv,S[1][:U]);
+    
+    m = divand.unpack(sv,Xm[:,1]);
+    
+    totvar = sum(abs2,Xp)
+    
+    # relative variance in percent
+    relvar = 100 * S[1][:S].^2 / totvar
+
+    return (m,eofs,relvar,totvar)
+end
+
 
 export nanmean, nansum, gausswin, vaporpressure, solarflux, sensibleflux, gaussfilter, longwaveflux, latentflux, datetime_matlab, freezing_temperature, density, secant_bulk_modulus
 

@@ -1,5 +1,19 @@
 module CMEMS
 
+using NCDatasets
+using DataArrays
+
+const no_qc_performed = 0                          
+const good_data = 1                                 
+const probably_good_data = 2
+const bad_data_that_are_potentially_correctable = 3
+const bad_data = 4
+const value_changed = 5
+const not_used = 6
+const nominal_value = 7
+const interpolated_value = 8
+const missing_value = 9
+
 
 #indexfname = download("ftp://$(username):$(password)@medinsitu.hcmr.gr/Core/INSITU_MED_TS_REP_OBSERVATIONS_013_041/index_history.txt")
 
@@ -36,7 +50,8 @@ julia> files = CMEMS.download(lonr,latr,timerange,param,username,password,basedi
 
 [^1]: http://marine.copernicus.eu/
 [^2]: http://www.coriolis.eu.org/Documentation/General-Informations-on-Data/Codes-Tables
-[^3]: https://web.archive.org/web/20140521170325/http://www.ifremer.fr:80/co/co050117/coriolis_parameters/coriolis_parameters.xls
+[^3]: http://doi.org/10.13155/40846
+
 
 """
 
@@ -101,8 +116,8 @@ function download(lonr,latr,timerange,param,username,password,basedir;
             parameter           = index[i,12] :: SubString{String}
             
             # selection based on coordinate
-            if ((lonr[1] <= geospatial_lon_max) && (geospatial_lon_min <= lonr[2]) &&
-                (latr[1] <= geospatial_lat_max) && (geospatial_lat_min <= latr[2]))
+            if ((lonr[1] <= geospatial_lon_max) && (geospatial_lon_min <= lonr[end]) &&
+                (latr[1] <= geospatial_lat_max) && (geospatial_lat_min <= latr[end]))
                 
                 # ignore bogous time
                 if (time_coverage_start != "TZ") && (time_coverage_end != "TZ")
@@ -135,6 +150,112 @@ function download(lonr,latr,timerange,param,username,password,basedir;
 
     return files
 end
+
+function loadvar(ds,param;
+                 fillvalue::T = NaN,
+                 qualityflags = [good_data, probably_good_data],
+                 qfname = param * "_QC",
+                 ) where T
+
+    if !(param in ds)
+        #@show "no data for",param
+        return T[]
+    end
+    
+    dataarray = ds[param][:]
+    data = fill(fillvalue,size(dataarray))
+    data[.!ismissing.(dataarray)] =  dataarray.data[.!ismissing.(dataarray)]
+       
+    if qfname in ds
+        qf = ds[qfname].var[:]
+
+        keep_data = falses(size(qf))
+        
+        for flag in qualityflags
+            keep_data[:] =  keep_data .| (qf .== flag)
+        end
+
+        data[(.!keep_data)] = fillvalue
+    end
+    
+    return data
+end
+
+function load(T,fname::TS,param; qualityflags = [good_data, probably_good_data]) where TS <: AbstractString
+    fillvalue = NaN
+    fillvalueDT = DateTime(1000,1,1)
+
+    #@show fname
+    
+    ds = Dataset(fname)
+    data = loadvar(ds,param;
+                   fillvalue = fillvalue,
+                   qualityflags = qualityflags)
+
+    lon = loadvar(ds,"LONGITUDE";
+                  fillvalue = fillvalue,
+                  qfname = "POSITION_QC",
+                  qualityflags = qualityflags)
+
+    if ndims(lon) == 1
+        @assert(size(lon,1) == size(data,2))        
+        lon = repmat(reshape(lon,1,size(lon,1)),size(data,1),1)
+    end
+    
+    lat = loadvar(ds,"LATITUDE";
+                  fillvalue = fillvalue,
+                  qfname = "POSITION_QC",
+                  qualityflags = qualityflags)
+    if ndims(lat) == 1
+        @assert(size(lat,1) == size(data,2))        
+        lat = repmat(reshape(lat,1,size(lat,1)),size(data,1),1)
+    end
+
+    z = loadvar(ds,"DEPH";
+                fillvalue = fillvalue,
+                qualityflags = qualityflags)
+    
+
+    time = loadvar(ds,"TIME";
+                   fillvalue = fillvalueDT,
+                   qualityflags = qualityflags)
+    #@show time
+    if ndims(time) == 1
+        @assert(size(time,1) == size(data,2))        
+        time = repmat(reshape(time,1,size(time,1)),size(data,1),1)
+    end
+
+    ids = fill(ds.attrib["id"],size(data))
+    close(ds)
+
+    return data,lon,lat,z,time,ids
+end
+    
+
+function load(T,fnames::Vector{TS},param;
+              qualityflags = [good_data, probably_good_data]) where TS <: AbstractString
+    data = T[]
+    lon = T[]
+    lat = T[]
+    z = T[]
+    time = DateTime[]
+    ids = String[]
+    
+    for fname in fnames
+        data_,lon_,lat_,z_,time_,ids_ = load(T,fname,param;
+                                             qualityflags = qualityflags)
+
+        append!(data,data_[:])
+        append!(lon,lon_[:])
+        append!(lat,lat_[:])
+        append!(z,z_[:])
+        append!(time,time_[:])
+        append!(ids,ids_[:])        
+    end
+
+    return data,lon,lat,z,time,ids
+end
+
 
 end
 

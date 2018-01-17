@@ -19,6 +19,9 @@ MYO-MOON-01,ftp://hostname/file2,32.,32.,95.,95.,2000-09-10T08:58:00Z,2010-11-15
     end
 end
 
+
+# check downloading some data (with a mock download function)
+
 username = "user"
 password = "pass"
 
@@ -40,3 +43,15 @@ files = CMEMS.download(lonr,latr,timerange,param,username,password,basedir;
 @test !contains(files[1],"file2")
 
 @test contains(String(logstream),"hostname")
+
+# check loading CMEMS data
+
+files = [joinpath(dirname(@__FILE__),"cmems_testfile1.nc")]
+
+
+data,lon,lat,z,time,ids = CMEMS.load(Float64,files,"PSAL");
+
+@test all(data .≈ 123)
+@test all(ids .== "GL_PR_BA_FQRQ_2000")
+
+
