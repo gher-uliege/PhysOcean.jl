@@ -1,3 +1,5 @@
+using NCDatasets
+
 ds = Dataset("cmems_testfile1.nc","c")
 # Dimensions
 
@@ -13,7 +15,7 @@ ds.dim["POSITION"] = 3
 ncTIME = defVar(ds,"TIME", Float64, ("TIME",)) 
 ncTIME.attrib["long_name"] = "time"
 ncTIME.attrib["standard_name"] = "time"
-ncTIME.attrib["units"] = "days since 1950-01-01T00:00:00Z"
+ncTIME.attrib["units"] = "days since 1950-01-01T00:00:00"
 ncTIME.attrib["valid_min"] = 0.0
 ncTIME.attrib["valid_max"] = 90000.0
 ncTIME.attrib["QC_indicator"] = 1
