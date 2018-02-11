@@ -71,8 +71,20 @@ function download(lonr,latr,timerange,param,username,password,basedir;
                        "ftp://vftpmo.io-bas.bg/Core/INSITU_BS_TS_REP_OBSERVATIONS_013_042/index_history.txt"
                    ],
                   log = STDOUT,
-                  download = Base.download
+                  download = Base.download,
+                  skipifpresent = true
                    )
+
+    const dateformat = DateFormat("y-m-dTH:M:SZ")
+
+    function parsetime(str)
+        #MYO-BLACKSEA-01,ftp://vftpmo.io-bas.bg/Core/INSITU_BS_TS_REP_OBSERVATIONS_013_042/history/mooring/BS_TS_MO_CG.nc,43.8022,43.8022,28.6025,28.6025,2016-01-01T00:15:00Z,2016-12-31T23:45:00ZZ,Institutul National de Cercetare-Dezvoltare pentru Geologie si Geoecologie Marina (GeoEcoMar) Romania,2017-03-03T09:23:50Z,R,DEPH TEMP CNDC FLU2 DOX1 ATMS DRYT WSPD WDIR GSPD HCSP HCDT
+        if contains(str,"ZZ")
+            return DateTime(replace(str,"ZZ","Z"),dateformat)            
+        else
+            return DateTime(str,dateformat)
+        end
+    end
     
     function downloadpw(URL,localname = tempname())
         print(log,"Downloading ");
@@ -90,7 +102,6 @@ function download(lonr,latr,timerange,param,username,password,basedir;
         return localname
     end
 
-    const dateformat = DateFormat("y-m-dTH:M:SZ")
     files = String[]
     
     for indexURL in indexURLs
@@ -104,10 +115,10 @@ function download(lonr,latr,timerange,param,username,password,basedir;
         for i = 1:size(index,1)
             catalog_id          = index[i,1] :: SubString{String}
             file_name           = index[i,2] :: SubString{String}
-            geospatial_lat_min  = index[i,3] :: Float64
-            geospatial_lat_max  = index[i,4] :: Float64
-            geospatial_lon_min  = index[i,5] :: Float64
-            geospatial_lon_max  = index[i,6] :: Float64
+            geospatial_lat_min  = Float64(index[i,3])
+            geospatial_lat_max  = Float64(index[i,4])
+            geospatial_lon_min  = Float64(index[i,5])
+            geospatial_lon_max  = Float64(index[i,6])
             time_coverage_start = index[i,7] :: SubString{String}
             time_coverage_end   = index[i,8] :: SubString{String}
             provider            = index[i,9] :: SubString{String}
@@ -123,8 +134,8 @@ function download(lonr,latr,timerange,param,username,password,basedir;
                 if (time_coverage_start != "TZ") && (time_coverage_end != "TZ")
                     # selection based on time
                     
-                    time_start = DateTime(time_coverage_start,dateformat)
-                    time_end = DateTime(time_coverage_end,dateformat)
+                    time_start = parsetime(time_coverage_start)
+                    time_end = parsetime(time_coverage_end)
                     
                     if (timerange[1] <= time_end) && (time_start <= timerange[2])
                         parameters = split(parameter)
@@ -138,7 +149,10 @@ function download(lonr,latr,timerange,param,username,password,basedir;
                             localname = joinpath(basedir,parts...)
                             dir = joinpath(basedir,parts[1:end-1]...)
                             mkpath(dir)
-                            downloadpw(file_name,localname)
+
+                            if !isfile(localname) || !skipifpresent
+                                downloadpw(file_name,localname)
+                            end
                             
                             push!(files,localname)
                         end
@@ -151,6 +165,18 @@ function download(lonr,latr,timerange,param,username,password,basedir;
     return files
 end
 
+"""
+    data = loadvar(ds,param;
+                   fillvalue::T = NaN,
+                   qualityflags = [good_data, probably_good_data],
+                   qfname = param * "_QC",
+                   )
+
+Load the NetCDF variable `param` from the NCDataset `ds`. 
+Data points not having the provide quality flags will be masked by `fillvalue`.
+`qfname` is the NetCDF variable name for the quality flags.
+
+"""
 function loadvar(ds,param;
                  fillvalue::T = NaN,
                  qualityflags = [good_data, probably_good_data],
@@ -181,6 +207,11 @@ function loadvar(ds,param;
     return data
 end
 
+"""
+    data,lon,lat,z,time,ids = load(T,fname::TS,param; qualityflags = [good_data, probably_good_data]) where TS <: AbstractString
+
+
+"""
 function load(T,fname::TS,param; qualityflags = [good_data, probably_good_data]) where TS <: AbstractString
     fillvalue = NaN
     fillvalueDT = DateTime(1000,1,1)
@@ -198,7 +229,7 @@ function load(T,fname::TS,param; qualityflags = [good_data, probably_good_data])
                   qualityflags = qualityflags)
 
     if ndims(lon) == 1
-        @assert(size(lon,1) == size(data,2))        
+        @assert size(lon,1) == size(data,2)
         lon = repmat(reshape(lon,1,size(lon,1)),size(data,1),1)
     end
     
@@ -207,21 +238,29 @@ function load(T,fname::TS,param; qualityflags = [good_data, probably_good_data])
                   qfname = "POSITION_QC",
                   qualityflags = qualityflags)
     if ndims(lat) == 1
-        @assert(size(lat,1) == size(data,2))        
+        @assert size(lat,1) == size(data,2)
         lat = repmat(reshape(lat,1,size(lat,1)),size(data,1),1)
     end
 
-    z = loadvar(ds,"DEPH";
-                fillvalue = fillvalue,
-                qualityflags = qualityflags)
+    z =
+        if "DEPH" in ds
+            loadvar(ds,"DEPH";
+                    fillvalue = fillvalue,
+                    qualityflags = qualityflags)
+        else
+            # assume 1 decibar is 1 meter
+            loadvar(ds,"PRES";
+                    fillvalue = fillvalue,
+                    qualityflags = qualityflags)
+        end
     
-
+    @show size(z),size(data)
     time = loadvar(ds,"TIME";
                    fillvalue = fillvalueDT,
                    qualityflags = qualityflags)
     #@show time
     if ndims(time) == 1
-        @assert(size(time,1) == size(data,2))        
+        @assert size(time,1) == size(data,2)
         time = repmat(reshape(time,1,size(time,1)),size(data,1),1)
     end
 
