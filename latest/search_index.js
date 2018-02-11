@@ -125,7 +125,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Sea-water properties",
     "title": "PhysOcean.CMEMS.load",
     "category": "Function",
-    "text": "data,lon,lat,z,time,ids = CMEMS.load(T,fnames,param; qualityflags = ...)\n\nLoad all data in the vector of file names fnames corresponding to the parameter  param as the data type T. Only the data with the quality flags  CMEMS.good_data and CMEMS.probably_good_data are loaded per default. The output parameters correspondata to the data, longitude, latitude, depth, time (as DateTime) and an identifier (as String).\n\nSee also CMEMS.download.\n\n\n\n"
+    "text": "data,lon,lat,z,time,ids = load(T,fname::TS,param; qualityflags = [good_data, probably_good_data]) where TS <: AbstractString\n\n\n\ndata,lon,lat,z,time,ids = CMEMS.load(T,fnames,param; qualityflags = ...)\n\nLoad all data in the vector of file names fnames corresponding to the parameter  param as the data type T. Only the data with the quality flags  CMEMS.good_data and CMEMS.probably_good_data are loaded per default. The output parameters correspondata to the data, longitude, latitude, depth, time (as DateTime) and an identifier (as String).\n\nSee also CMEMS.download.\n\n\n\n"
 },
 
 {
