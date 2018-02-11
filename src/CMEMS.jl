@@ -254,7 +254,6 @@ function load(T,fname::TS,param; qualityflags = [good_data, probably_good_data])
                     qualityflags = qualityflags)
         end
     
-    @show size(z),size(data)
     time = loadvar(ds,"TIME";
                    fillvalue = fillvalueDT,
                    qualityflags = qualityflags)
