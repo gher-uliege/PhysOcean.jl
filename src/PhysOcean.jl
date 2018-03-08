@@ -12,6 +12,9 @@ module PhysOcean
 # temperature in Kelvin of 0 degree Celsius
 const TK = 273.15
 
+# angularspeed of earth with respect to fixed star
+const OMEGA = 7.2921150E-5
+
 function nansum(x)
     return sum(x[.!isnan.(x)])
 end
@@ -336,6 +339,33 @@ end
 include("CMEMS.jl")
 export CMEMS
 
+"""
+    coriolisfrequency(latitude)
+
+Provides coriolisfrequency et given latidudes in DEGREES from -90 Southpole to +90 Northpole
+"""
+
+function coriolisfrequency(latitude)
+    
+
+    return 2*OMEGA*sin.(pi/180.0.*latitude)
+end
+
+"""
+    earthgravity(latitude)
+
+Provides gravity in m/s2 at ocean surface at given latidudes in DEGREES from -90 Southpole to +90 Northpole
+"""
+
+function earthgravity(latitude)
+    
+    latrad=pi/180*latitude
+    return 9.780327.*(1.0026454-0.0026512.*
+	         cos.(2*latrad)+0.0000058*(cos.(2*latrad)).^2
+	)
+end
+
+
 
 # """
 #     meof(masks,vars; nsv = 20)
@@ -365,7 +395,7 @@ export CMEMS
 # end
 
 
-export nanmean, nansum, gausswin, vaporpressure, solarflux, sensibleflux, gaussfilter, longwaveflux, latentflux, datetime_matlab, freezing_temperature, density, secant_bulk_modulus
+export nanmean, nansum, gausswin, vaporpressure, solarflux, sensibleflux, gaussfilter, longwaveflux, latentflux, datetime_matlab, freezing_temperature, density, secant_bulk_modulus, coriolisfrequency, earthgravity
 
 include("castaway.jl")
 export loadcastaway
