@@ -9,10 +9,10 @@ it can be used to calculate dynamic pressure up to a constant. Function can be u
 # Input:
 * rhop: density anomaly array
 * z: vertical position array. Zero at surface and positive downward, same dimensions as rhop
-* dim: along which dimension depth is found and integral is performed 
+* dim: along which dimension depth is found and integral is performed. If not provided, last dimension is taken
 
-
-
+# Output:
+* Integrated value to the same levels as on which rhop where given. So basically total density anomaly ABOVE the current depth
 # Note:
 
 
@@ -56,27 +56,21 @@ end
 
 
 
-# From https://julialang.org/blog/2016/02/iteration
-# function expfiltdim(x, dim::Integer, α)
-    # s = similar(x)
-    # Rpre = CartesianRange(size(x)[1:dim-1])
-    # Rpost = CartesianRange(size(x)[dim+1:end])
-    # _expfilt!(s, x, α, Rpre, size(x, dim), Rpost)
-# end
+# Adapted from https://julialang.org/blog/2016/02/iteration
 
-# @noinline function _expfilt!(s, x, α, Rpre, n, Rpost)
-    # for Ipost in Rpost
-        # # Initialize the first value along the filtered dimension
-        # for Ipre in Rpre
-            # s[Ipre, 1, Ipost] = x[Ipre, 1, Ipost]
-        # end
-        # # Handle all other entries
-        # for i = 2:n
-            # for Ipre in Rpre
-                # s[Ipre, i, Ipost] = α*x[Ipre, i, Ipost] + (1-α)*s[Ipre, i-1, Ipost]
-            # end
-        # end
-    # end
-    # s
-# end
 
+# Copyright (C)           2018 Alexander Barth 		<a.barth@ulg.ac.be>
+#                              Jean-Marie Beckers 	<jm.beckers@ulg.ac.be>
+#
+# This program is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free Software
+# Foundation; either version 2 of the License, or (at your option) any later
+# version.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+# details.
+#
+# You should have received a copy of the GNU General Public License along with
+# this program; if not, see <http://www.gnu.org/licenses/>.

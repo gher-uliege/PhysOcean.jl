@@ -348,7 +348,7 @@ Provides coriolisfrequency et given latidudes in DEGREES from -90 Southpole to +
 function coriolisfrequency(latitude)
     
 
-    return 2*OMEGA*sin.(pi/180.0.*latitude)
+    return 2*OMEGA*sin(pi/180*latitude)
 end
 
 """
@@ -360,8 +360,8 @@ Provides gravity in m/s2 at ocean surface at given latidudes in DEGREES from -90
 function earthgravity(latitude)
     
     latrad=pi/180*latitude
-    return 9.780327.*(1.0026454-0.0026512.*
-	         cos.(2*latrad)+0.0000058*(cos.(2*latrad)).^2
+    return 9.780327*(1.0026454-0.0026512*
+	         cos(2*latrad)+0.0000058*(cos(2*latrad))^2
 	)
 end
 
@@ -395,8 +395,12 @@ end
 # end
 
 include("integraterhoprime.jl")
+include("stericheight.jl")
+include("deepestpoint.jl")
+include("floodfill!.jl")
+include("addlowtoheighdimension.jl")
 
-export nanmean, nansum, gausswin, vaporpressure, solarflux, sensibleflux, gaussfilter, longwaveflux, latentflux, datetime_matlab, freezing_temperature, density, secant_bulk_modulus, coriolisfrequency, earthgravity, integraterhoprime
+export nanmean, nansum, gausswin, vaporpressure, solarflux, sensibleflux, gaussfilter, longwaveflux, latentflux, datetime_matlab, freezing_temperature, density, secant_bulk_modulus, coriolisfrequency, earthgravity, integraterhoprime, stericheight, deepestpoint, floodfill!, addlowtoheighdimension
 
 include("castaway.jl")
 export loadcastaway
