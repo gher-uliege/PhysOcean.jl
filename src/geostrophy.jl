@@ -32,18 +32,18 @@ end
 
 rhof=deepcopy(rhop)
 B=deepcopy(rhop)
-A[find(.~mask)]=NaN
+rhof[find(.~mask)]=NaN
 
 floodfill!(rhof,B,NaN)
 
 # Now integrate in dimension dim
 
-rhoi=integraterhoprime(rhof,z,dim)
+rhoi=integraterhoprime(rhof,xiin[dim],dim)
 
 # If ssh provided use it, otherwise first calculate steric height
 
   if znomotion>0
-    ssh=stericheight(rhoi,z,znomotion,dim)
+    ssh=stericheight(rhoi,xiin[dim],znomotion,dim)
   end
 
 # Now add barotropic pressure onto the direction dim 
@@ -59,15 +59,16 @@ poverrhog=earthgravity.(xiin[2])./coriolisfrequency.(xiin[2]).*addlowtoheighdime
 
 # Loop over dimensions 1 to dim-1
 
-VN=0*similar(poverrhog)
+
 
 velocity=()
 
 for i=1:dim-1
 
+VN=0*similar(poverrhog)
 Rpre = CartesianRange(size(poverrhog)[1:i-1])
 Rpost = CartesianRange(size(poverrhog)[i+1:end])
-n=size(poverrhog)[dim]
+n=size(poverrhog)[i]
 
     for Ipost in Rpost
         
@@ -78,13 +79,14 @@ n=size(poverrhog)[dim]
         end
     end
 	
-velocity=tuple(velocity...,(VN...))
+velocity=tuple(velocity...,(deepcopy(VN)))
 end
 
 # for the moment only component 2, need to check how to accumulate into a tuple
 
-return velocity,ssh
-  
+return velocity,ssh,poverrhog
+ 
+end 
 
 
 # Copyright (C)           2018 Alexander Barth 		<a.barth@ulg.ac.be>
