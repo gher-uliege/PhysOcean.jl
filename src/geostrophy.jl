@@ -20,7 +20,7 @@ Dimensions are supposed to be ordered horizontal, vertical, other dimensions
 
 """
 
-function geostrophy(rhop,;dim::Integer=0,ssh=(),znomotion=0)
+function geostrophy(mask::BitArray,rhop,pmnin,xiin;dim::Integer=0,ssh=(),znomotion=0)
 
 if dim==0
 # assume depth is last dimension
@@ -49,16 +49,41 @@ rhoi=integraterhoprime(rhof,z,dim)
 # Now add barotropic pressure onto the direction dim 
 
 poverrho=similar(rhoi)
+# Now times g/f
+poverrhog=earthgravity.(xiin[2])./coriolisfrequency.(xiin[2]).*addlowtoheighdimension(ssh,rhoi/1025.,dim)
 
-poverrhog=addlowtoheighdimension(ssh,rhoi/1025.,dim)
-
-# Now times g/f and gradient
-
-
-
+ 
+# Need to decide how to provide latitude if 1D ...
 
 
-return geostropicvelocity,ssh
+
+# Loop over dimensions 1 to dim-1
+
+VN=0*similar(poverrhog)
+
+velocity=()
+
+for i=1:dim-1
+
+Rpre = CartesianRange(size(poverrhog)[1:i-1])
+Rpost = CartesianRange(size(poverrhog)[i+1:end])
+n=size(poverrhog)[dim]
+
+    for Ipost in Rpost
+        
+        for j = 1:n-1
+            for Ipre in Rpre
+                 VN[Ipre, j, Ipost] = (poverrhog[Ipre, j+1 , Ipost]-poverrhog[Ipre, j , Ipost])*pmnin[i][Ipre, j , Ipost]
+			end
+        end
+    end
+	
+velocity=tuple(velocity...,(VN...))
+end
+
+# for the moment only component 2, need to check how to accumulate into a tuple
+
+return velocity,ssh
   
 
 
