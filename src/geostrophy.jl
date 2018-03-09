@@ -6,15 +6,16 @@ Dimensions are supposed to be ordered horizontal, vertical, other dimensions
 
 # Input:
 * rhop: density anomaly array
-* z: vertical position array. Zero at surface and positive downward, same dimensions as rhop
-* dim: along which dimension depth is found and integral is performed 
-* either provide level of no motion or ssh eta
+* pmnin: tuple of metrics as in divand, but should be in m 
+* xiin: tuple position of the grid points.
+* either provide level of no motion or ssh eta LEVEL IS INDEX NUMBER FOR THE MOMENT
 * dimensions of ssh must be the same as rhop in which vertical dimension has been taken out
 
 
 # Output:
 * Velocity tuple components NORMAL and to the left of each coordinate line
 * eta : sea surface height deduced
+* fluxes: integrated velocities across sections.
 # Note:
 
 
@@ -49,9 +50,10 @@ rhoi=integraterhoprime(rhof,xiin[dim],dim)
 # Now add barotropic pressure onto the direction dim 
 
 poverrho=similar(rhoi)
-# Now times g/f
-poverrhog=earthgravity.(xiin[2])./coriolisfrequency.(xiin[2]).*addlowtoheighdimension(ssh,rhoi/1025.,dim)
+# 
+poverrhog=addlowtoheighdimension(ssh,rhoi/1025.,dim)
 
+goverf=earthgravity.(xiin[2])./coriolisfrequency.(xiin[2])
  
 # Need to decide how to provide latitude if 1D ...
 
@@ -62,6 +64,7 @@ poverrhog=earthgravity.(xiin[2])./coriolisfrequency.(xiin[2]).*addlowtoheighdime
 
 
 velocity=()
+fluxes=()
 
 for i=1:dim-1
 
@@ -74,17 +77,36 @@ n=size(poverrhog)[i]
         
         for j = 1:n-1
             for Ipre in Rpre
-                 VN[Ipre, j, Ipost] = (poverrhog[Ipre, j+1 , Ipost]-poverrhog[Ipre, j , Ipost])*pmnin[i][Ipre, j , Ipost]
+                 VN[Ipre, j, Ipost] = (poverrhog[Ipre, j+1 , Ipost]-poverrhog[Ipre, j , Ipost])*pmnin[i][Ipre, j , Ipost]*goverf[Ipre, j , Ipost]
 			end
         end
     end
-	
+VN[find(.~mask)]=0
+
 velocity=tuple(velocity...,(deepcopy(VN)))
+
+# maybe add volume flux calculation using mask putting zero and integraterhoprime of VN/pnmin[i] with previous loop and then simple sum in remaining direction of # bottom value yep should work easily !!!
+
+ind1 = [(j == dim ? (size(VN)[dim]) : (:)) for j = 1:ndims(VN)]
+
+@show ind1
+dummy=integraterhoprime(VN./pmnin[i],xiin[dim],dim)
+@show size(dummy)
+
+@show size(dummy[ind1...])
+
+fluxi=squeeze(sum(dummy[ind1...],i),i)
+
+@show size(fluxi), var(fluxi),mean(VN),var(VN)
+
+fluxes=tuple(fluxes...,(deepcopy(fluxi)))
+
 end
 
-# for the moment only component 2, need to check how to accumulate into a tuple
 
-return velocity,ssh,poverrhog
+
+
+return velocity,ssh,fluxes
  
 end 
 
