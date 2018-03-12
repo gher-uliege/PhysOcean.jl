@@ -10,6 +10,7 @@ Dimensions are supposed to be ordered horizontal, vertical, other dimensions
 * xiin: tuple position of the grid points.
 * either provide level of no motion or ssh eta LEVEL IS INDEX NUMBER FOR THE MOMENT
 * dimensions of ssh must be the same as rhop in which vertical dimension has been taken out
+* If you force fillin=false, then you must have created the density array without missing values outside of this call
 
 
 # Output:
@@ -21,7 +22,7 @@ Dimensions are supposed to be ordered horizontal, vertical, other dimensions
 
 """
 
-function geostrophy(mask::BitArray,rhop,pmnin,xiin;dim::Integer=0,ssh=(),znomotion=0)
+function geostrophy(mask::BitArray,rhop,pmnin,xiin;dim::Integer=0,ssh=(),znomotion=0,fillin=true)
 
 if dim==0
 # assume depth is last dimension
@@ -29,13 +30,20 @@ dim=ndims(rhop)
 end
 
 
-# Fill in density anomalies on land
+
+
+
 
 rhof=deepcopy(rhop)
-B=deepcopy(rhop)
-rhof[find(.~mask)]=NaN
 
-floodfill!(rhof,B,NaN)
+# If asked for, fill in density anomalies on land
+# If not asked for the field must have already been filled in by other means
+if fillin
+	B=deepcopy(rhop)
+	rhof[find(.~mask)]=NaN
+	floodfill!(rhof,B,NaN)
+end
+
 
 # Now integrate in dimension dim
 
