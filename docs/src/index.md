@@ -52,7 +52,17 @@ gaussfilter(x,N)
 
 
 # Data download
+
+## CMEMS
+
 ```@docs
 CMEMS.download
 CMEMS.load
+```
+
+## World Ocean Database (NODC)
+
+```@docs
+WorldOceanDatabase.download
+WorldOceanDatabase.load
 ```

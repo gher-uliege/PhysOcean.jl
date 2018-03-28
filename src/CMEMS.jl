@@ -15,6 +15,7 @@ const interpolated_value = 8
 const missing_value = 9
 
 
+const fillvalueDT = DateTime(1000,1,1)
 #indexfname = download("ftp://$(username):$(password)@medinsitu.hcmr.gr/Core/INSITU_MED_TS_REP_OBSERVATIONS_013_041/index_history.txt")
 
 
@@ -294,12 +295,17 @@ function load(T,fnames::Vector{TS},param;
         data_,lon_,lat_,z_,time_,ids_ = load(T,fname,param;
                                              qualityflags = qualityflags)
 
-        append!(data,data_[:])
-        append!(lon,lon_[:])
-        append!(lat,lat_[:])
-        append!(z,z_[:])
-        append!(time,time_[:])
-        append!(ids,ids_[:])        
+        good = falses(size(data_))
+        for i = 1:length(data_)
+            good[i] = !(isnan(data_[i]) || isnan(lon_[i]) || isnan(lat_[i]) || isnan(z_[i]) || time_[i] == fillvalueDT)
+        end
+        
+        append!(data,data_[good])
+        append!(lon,lon_[good])
+        append!(lat,lat_[good])
+        append!(z,z_[good])
+        append!(time,time_[good])
+        append!(ids,ids_[good])        
     end
 
     return data,lon,lat,z,time,ids

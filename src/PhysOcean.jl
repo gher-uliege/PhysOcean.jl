@@ -335,10 +335,6 @@ function gaussfilter(x,N)
     return xf
 end
 
-
-include("CMEMS.jl")
-export CMEMS
-
 """
     coriolisfrequency(latitude)
 
@@ -405,5 +401,11 @@ export nanmean, nansum, gausswin, vaporpressure, solarflux, sensibleflux, gaussf
 
 include("castaway.jl")
 export loadcastaway
+
+include("CMEMS.jl")
+export CMEMS
+
+include("WorldOceanDatabase.jl")
+export WorldOceanDatabase
 
 end
