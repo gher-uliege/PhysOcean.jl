@@ -113,6 +113,14 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "index.html#Data-download-1",
+    "page": "Sea-water properties",
+    "title": "Data download",
+    "category": "section",
+    "text": ""
+},
+
+{
     "location": "index.html#PhysOcean.CMEMS.download",
     "page": "Sea-water properties",
     "title": "PhysOcean.CMEMS.download",
@@ -129,11 +137,35 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "index.html#Data-download-1",
+    "location": "index.html#CMEMS-1",
     "page": "Sea-water properties",
-    "title": "Data download",
+    "title": "CMEMS",
     "category": "section",
     "text": "CMEMS.download\nCMEMS.load"
+},
+
+{
+    "location": "index.html#PhysOcean.WorldOceanDatabase.download",
+    "page": "Sea-water properties",
+    "title": "PhysOcean.WorldOceanDatabase.download",
+    "category": "function",
+    "text": "dirnames,indexnames = WorldOceanDatabase.download(lonrange,latrange,timerange,\n  variable,email,basedir)\n\nDownload data using the NODC web-service. The range parameters are vectors from with the frist element is the lower bound and the last element is the upper bound. The parameters of the functions will  be transmitted to nodc.noaa.gov (http://www.noaa.gov/privacy.html). Note that no XBT corrections are applied. The table below show the avialable variable and their units.\n\nVariables Unit\nTemperature °C\nSalinity unitless\nOxygen ml l⁻¹\nPhosphate µM\nSilicate µM\nNitrate and Nitrate+Nitrite µM\npH unitless\nChlorophyll µg l⁻¹\nPlankton multiple\nAlkalinity meq l⁻¹\nPartial Pressure of Carbon Dioxide µatm\nDissolved Inorganic Carbon mM\nTransmissivity m⁻¹\nPressure dbar\nAir temperature °C\nCO2 warming °C\nCO2 atmosphere ppm\nAir pressure mbar\nTritium TU\nHelium nM\nDelta Helium-3 %\nDelta Carbon-14 ᵒ/ᵒᵒ\nDelta Carbon-13 ᵒ/ᵒᵒ\nArgon nM\nNeon nM\nChlorofluorocarbon 11 (CFC 11) pM\nChlorofluorocarbon 12 (CFC 12) pM\nChlorofluorocarbon 113 (CFC 113) pM\nDelta Oxygen-18 ᵒ/ᵒᵒ\n\n\n\n"
+},
+
+{
+    "location": "index.html#PhysOcean.WorldOceanDatabase.load",
+    "page": "Sea-water properties",
+    "title": "PhysOcean.WorldOceanDatabase.load",
+    "category": "function",
+    "text": " load(T,dirname,indexname,varname)\n\nLoad all profiles with the NetCDF variable varname in dirname indexed with  the NetCDF file indexname. T is the type (e.g. Float64) for numeric return values.\n\n\n\nvalue,lon,lat,depth,obstime,id = load(T,dirnames,varname)\n\nLoad a list  of directories dirnames.\n\n\n\nvalue,lon,lat,depth,obstime,id = WorldOceanDatabase.load(T,basedir::AbstractString,varname)\n\nLoad a list profiles under the directory basedir assuming basedir was  populated by WorldOceanDatabase.download.\n\n\n\n"
+},
+
+{
+    "location": "index.html#World-Ocean-Database-(NODC)-1",
+    "page": "Sea-water properties",
+    "title": "World Ocean Database (NODC)",
+    "category": "section",
+    "text": "WorldOceanDatabase.download\nWorldOceanDatabase.load"
 },
 
 ]}
