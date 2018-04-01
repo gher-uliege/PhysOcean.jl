@@ -30,6 +30,67 @@ dim=ndims(rhop)
 end
 
 
+#############################################
+function myfilter3(A::AbstractArray,fillvalue,isfixed,ntimes=1)
+
+    #
+    function dvisvalue(x)
+        if isnan(fillvalue)
+            return !isnan(x);
+        else
+            return !(x==fillvalue);
+        end
+    end
+
+    nd=ndims(A)
+    # central weight
+    cw=3^nd-1
+    cw=1
+    out = similar(A)
+    if ntimes>1
+        B=deepcopy(A)
+    else
+        B=A
+    end
+
+    R = CartesianRange(size(A))
+    I1, Iend = first(R), last(R)
+    for nn=1:ntimes
+
+        for I in R
+            w, s = 0.0, zero(eltype(out))
+            # Define out[I] fillvalue
+            out[I] = fillvalue
+            if dvisvalue(B[I])
+                for J in CartesianRange(max(I1, I-I1), min(Iend, I+I1))
+                    # If not a fill value
+                    #                if !(B[J] == fillvalue)
+                    if dvisvalue(B[J])
+                        s += B[J]
+                        if (I==J)
+                            w += cw
+                        else
+                            w += 1.
+                        end
+                    end
+                    # end if not fill value
+                end
+				if isfixed[I]
+				    out[I]=A[I]
+				  else
+				    if w>0.0 
+                    out[I] = s/w
+                    end
+				end
+            end
+        end
+        B=deepcopy(out);
+    end
+
+
+    return out
+end
+##########################################
 
 
 
@@ -39,27 +100,94 @@ rhof=deepcopy(rhop)
 # If asked for, fill in density anomalies on land
 # If not asked for the field must have already been filled in by other means
 if fillin
-	B=deepcopy(rhop)
+	BBB=deepcopy(rhop)
 	rhof[find(.~mask)]=NaN
-	floodfill!(rhof,B,NaN)
+	#maybe better to floodfill in all directions EXCEPT vertically. So loop on layers and indexing ?
+	#floodfill!(rhof,B,NaN)
+	for iz=1:size(BBB)[dim]
+	  ind2 = [(j == dim ? (iz) : (:)) for j = 1:ndims(rhop)]
+	  #@show ind2,iz,dim
+	  #@show rhop[ind2...]
+	  aaa=deepcopy(rhof[ind2...])
+	  #@show size(BBB),size(rhof)
+	  bbb=deepcopy(BBB[ind2...])
+	  #@show size(aaa),size(bbb)
+	  nanpos=isnan.(aaa)
+	  #@show size(aaa),size(bbb)
+	  aaa=floodfill!(aaa,bbb,NaN)
+	  # @show size(aaa),size(bbb)
+	 #  Now one also should filter in the places where originially NaN where found
+	  # si using divand_filter3(,NaN,10)
+	  
+	  zzzz=fill(NaN,size(aaa))
+	  #@show size(zzzz)
+	  zzzz[nanpos]=aaa[nanpos]
+	  isfixed=fill(true,size(aaa))
+	  isfixed[nanpos]=false
+	  
+	  zzzz=myfilter3(zzzz,NaN,isfixed,20)
+	  aaa[nanpos]=zzzz[nanpos]
+	  #@show size(aaa),size(zzzz)
+     #@show size(rhof)
+	 rhof[ind2...]=deepcopy(aaa)
+	  
+	  
+	  
+	  
+	end
+	
 end
 
 
 # Now integrate in dimension dim
 
+#@show size(rhop),size(rhof),typeof(rhop),typeof(rhof),mean(var(rhof,2))
+
 rhoi=integraterhoprime(rhof,xiin[dim],dim)
+
+#@show size(rhoi),size(rhof)
+
+#@show mean(var(rhoi,2)),mean(var(rhop,2))
 
 # If ssh provided use it, otherwise first calculate steric height
 
   if znomotion>0
     ssh=stericheight(rhoi,xiin[dim],znomotion,dim)
+	    else
+		if fillin
+		 ind2 = [(j == dim ? (1) : (:)) for j = 1:ndims(mask)]
+		 # @show ind2
+		  ssh[find(.~mask[ind2...])]=NaN
+		 # @show ssh
+		 aaa=deepcopy(ssh)
+		 bbb=deepcopy(ssh)
+	  
+	     nanpos=isnan.(aaa)
+	    
+	     aaa=floodfill!(aaa,bbb,NaN)
+		 zzzz=fill(NaN,size(aaa))
+	    #@show size(zzzz)
+	     zzzz[nanpos]=aaa[nanpos]
+	     isfixed=fill(true,size(aaa))
+	     isfixed[nanpos]=false
+	  
+	    zzzz=myfilter3(zzzz,NaN,isfixed,20)
+	    aaa[nanpos]=zzzz[nanpos]
+		ssh=deepcopy(aaa)
+		 
+		end
   end
 
 # Now add barotropic pressure onto the direction dim 
 
 poverrho=similar(rhoi)
+
+#@show var(rhoi),mean(rhoi)
+
 # 
 poverrhog=addlowtoheighdimension(ssh,rhoi/1025.,dim)
+
+#@show mean(var(poverrhog,2))
 
 goverf=earthgravity.(xiin[2])./coriolisfrequency.(xiin[2])
  
@@ -76,7 +204,13 @@ fluxes=()
 
 for i=1:dim-1
 
-VN=0*similar(poverrhog)
+
+
+#VN=0*similar(poverrhog)
+VN=zeros(Float64,size(poverrhog))
+
+#@show mean(VN),mean(poverrhog),typeof(poverrhog),typeof(VN)
+
 Rpre = CartesianRange(size(poverrhog)[1:i-1])
 Rpost = CartesianRange(size(poverrhog)[i+1:end])
 n=size(poverrhog)[i]
@@ -89,23 +223,48 @@ n=size(poverrhog)[i]
 			end
         end
     end
-VN[find(.~mask)]=0
+VN[find(.~mask)]=0.0
+
+if isnan(mean(VN))
+ @show mean(VN)
+ warning("Problem in geostrophic calculation")
+end
 
 velocity=tuple(velocity...,(deepcopy(VN)))
+
+#@show mean(VN)
 
 # maybe add volume flux calculation using mask putting zero and integraterhoprime of VN/pnmin[i] with previous loop and then simple sum in remaining direction of # bottom value yep should work easily !!!
 
 ind1 = [(j == dim ? (size(VN)[dim]) : (:)) for j = 1:ndims(VN)]
 
-@show ind1
-dummy=integraterhoprime(VN./pmnin[i],xiin[dim],dim)
-@show size(dummy)
+#@show ind1, size(VN),size(pmnin[i])
 
-@show size(dummy[ind1...])
+dummy=integraterhoprime(VN./pmnin[i],xiin[dim],dim)
+
+
+#@show size(dummy),mean(VN),mean(dummy)
+
+# now take deepast value for VN which is the integral
+
+hjm=deepestpoint(mask,dummy)
+
+#@show size(dummy[ind1...]),size(hjm)
+
+
+
 
 fluxi=squeeze(sum(dummy[ind1...],i),i)
 
-@show size(fluxi), var(fluxi),mean(VN),var(VN)
+#@show size(fluxi), var(fluxi),mean(VN),var(VN)
+
+#if isnan(var(fluxi))
+
+#@show dummy[ind1...]
+#@show VN[ind1...]./pmnin[i][ind1...]
+#@show xiin[dim][ind1...]
+
+#end
 
 fluxes=tuple(fluxes...,(deepcopy(fluxi)))
 

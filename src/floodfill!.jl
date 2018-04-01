@@ -3,7 +3,7 @@
 # to  fill values in a regular grid array. 
 
 
-function floodfill!(A::AbstractArray,B::AbstractArray,fillvalue)
+function floodfill!(A::AbstractArray,B::AbstractArray,fillvalue;MAXITER=())
 
     #
     function dvisvalue(x)
@@ -13,17 +13,24 @@ function floodfill!(A::AbstractArray,B::AbstractArray,fillvalue)
             return !(x==fillvalue);
         end
     end
+	if MAXITER==()
+	  MAXITER=sum(size(B))
+	  #@show MAXITER
+	end
+	
+	
     ntimes=1
     nd=ndims(A)
     # central weight
     cw=3^nd-1
     cw=1
-    
+    iter=0
 
     R = CartesianRange(size(A))
     I1, Iend = first(R), last(R)
 	needtocontinue=true
     while needtocontinue
+	    iter=iter+1
         needtocontinue=false
         for I in R
             w, s = 0.0, zero(eltype(A))
@@ -50,7 +57,9 @@ function floodfill!(A::AbstractArray,B::AbstractArray,fillvalue)
             end
         end
         
-		
+	if iter > MAXITER
+	needtocontinue=false
+    end	
 	A[:]=B[:]
 		
     end

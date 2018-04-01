@@ -56,6 +56,126 @@ using Base.Test
     filename = joinpath(dirname(@__FILE__),"20160622_0747_TC100.csv")
     data,header,metadata = loadcastaway(filename)
     @test data[1,end] ≈ 1026.4925224486576
+	
+	
+	@test earthgravity.([90 0]) ≈ [9.8321862058848 9.780327]
+	@test coriolisfrequency.([90 0]) ≈ [0.0001458423 0]
+	
+	mask=trues(3,4,5)
+    myval=zeros(3,4,5)
+    botval=zeros(3,4)
+    for i=1:3
+       for j=1:4
+          botval[i,j]=i+j+5
+          for k=1:5
+            myval[i,j,k]=i+j+k
+            if k>i+j
+                mask[i,j,k]=false
+                botval[i,j]=2*(i+j)
+            end
+          end
+       end
+    end
+    @test var(deepestpoint(mask,myval)-botval)==0
+
+	mask=trues(3,4,5)
+	myval=zeros(3,4,5)
+	eta=zeros(3,4)
+	myvals=zeros(3,4,5)
+	for i=1:3
+		for j=1:4
+			eta[i,j]=i-j
+			for k=1:5
+				myval[i,j,k]=i+j+k
+				myvals[i,j,k]=myval[i,j,k]+eta[i,j]
+			end
+		end
+	end
+    @test var(addlowtoheighdimension(eta,myval)-myvals)==0
+	
+	mask=trues(3,4,5)
+	myval=zeros(3,4,5)
+	myvali=zeros(3,4,5)
+	zval=zeros(3,4,5)
+	eta=zeros(3,4)
+	myvals=zeros(3,4,5)
+	for i=1:3
+    for j=1:4
+        
+        for k=1:5
+            myval[i,j,k]=i+j
+            myvali[i,j,k]=(i+j)*k
+            zval[i,j,k]=k
+        end
+    end
+	end
+	@test var(integraterhoprime(myval,zval)-myvali)==0
+	
+	mask=trues(3,4,5)
+	myval=zeros(3,4,5)
+
+	zval=zeros(3,4,5)
+	eta=zeros(3,4)
+	myvals=zeros(3,4,5)
+	for i=1:3
+    for j=1:4
+        
+        for k=1:5
+            myval[i,j,k]=i+j+k
+            
+            zval[i,j,k]=k
+        end
+    end
+	end
+
+	@test var(stericheight(myval,zval,3)*1025.0+myval[:,:,3])==0
+	
+	
+	myval=zeros(3,4,5)
+	myvals=zeros(3,4,5)
+	for i=1:3
+		for j=1:4
+             for k=1:5
+				myval[i,j,k]=i+j+k
+			end
+		end
+	end
+	myval[2,2:3,3:4]=NaN
+	floodfill!(myval,myvals,NaN)
+	refval=[6.826086956521739 8.0; 8.0 9.173913043478262]
+	@test myval[2,2:3,3:4] ≈ refval
+	
+	
+	
+	xi=zeros(3,4,5)
+	yi=zeros(3,4,5)
+	zi=zeros(3,4,5)
+	pm=zeros(3,4,5)
+	pn=zeros(3,4,5)
+	po=zeros(3,4,5)
+
+	mask=trues(3,4,5)
+
+	for i=1:3
+    for j=1:4
+        for k=1:5
+            xi[i,j,k]=i
+            yi[i,j,k]=30+j
+            zi[i,j,k]=10*k
+            pm[i,j,k]=1
+            pn[i,j,k]=1
+            po[i,j,k]=0.1
+        end
+    end
+	end
+	temp=16-zi/1600+cos.(1.4*xi+0*xi-zi/300)+xi/5.*xi./(zi+1)/2000.*(zi/1000+xi)
+	salt=28+xi
+	dens=density.(salt,temp,0)-1025;
+	velocities,eta,Vflux=geostrophy(mask,dens,(pm,pn,po),(xi,yi,zi);znomotion=3);
+	@test var(eta) ≈ 0.00045683197717526355
+	
+	
+	
 
     include("test_cmems.jl")
 end

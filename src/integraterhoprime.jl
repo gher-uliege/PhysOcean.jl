@@ -51,7 +51,14 @@ end
             end
         end
     end
-    rhoi
+#    @show size(rhoi),mean(var(rhoi,2)),mean(var(rhop,2)),mean(var(z,2))
+#	if isnan(mean(rhoi))
+#	@ show find(isnan.(rhoi))
+#	end
+
+	rhoi
+	
+	
 end
 
 
