@@ -113,6 +113,46 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "index.html#PhysOcean.coriolisfrequency-Tuple{Any}",
+    "page": "Sea-water properties",
+    "title": "PhysOcean.coriolisfrequency",
+    "category": "method",
+    "text": "coriolisfrequency(latitude)\n\nProvides coriolisfrequency et given latidudes in DEGREES from -90 Southpole to +90 Northpole\n\n\n\n"
+},
+
+{
+    "location": "index.html#PhysOcean.earthgravity-Tuple{Any}",
+    "page": "Sea-water properties",
+    "title": "PhysOcean.earthgravity",
+    "category": "method",
+    "text": "earthgravity(latitude)\n\nProvides gravity in m/s2 at ocean surface at given latidudes in DEGREES from -90 Southpole to +90 Northpole\n\n\n\n"
+},
+
+{
+    "location": "index.html#Earth-1",
+    "page": "Sea-water properties",
+    "title": "Earth",
+    "category": "section",
+    "text": "coriolisfrequency(latitude)earthgravity(latitude)"
+},
+
+{
+    "location": "index.html#PhysOcean.geostrophy-Tuple{BitArray,Any,Any,Any}",
+    "page": "Sea-water properties",
+    "title": "PhysOcean.geostrophy",
+    "category": "method",
+    "text": "velocity,ssh,fluxes=geostrophy(mask::BitArray,rhop,pmnin,xiin;dim::Integer=0,ssh=(),znomotion=0,fillin=true)\n\nInput:\n\nmask : Boolean array with true in water and false on land. \nrhop : density anomaly (rho-1025) array on the same grid as the mask. \npmnin: tuple of metrics as in divand, but to get velocities in m/s the metrics need to be in per meters too.\nxiin: tuple position of the grid points.\ndim : optional paramter telling which index in the arrays corresponds to the vertical direction. By default 0 uses the last index\nssh : array as mask for which the vertical direction is taken out. Corresponds to sea surface height in meters. Default is no used but diagnosed\nznomotion : index in the vertical direction where a level of no motion is assumed\nfillin : Boolean telling if a filling of land points using water points at the same level is to be used. Default is yes. \n\nOutput:\n\nvelocity tuple of velocity components NORMAL and to the left of each coordinate line\neta : sea surface height deduced. If a ssh was provided in input it returs ssh but filled in on land.\nfluxes: integrated velocities across sections in each horizontal direction. Same conventions as for velocities\n\nNote:\n\nCalculates geostrophic velocities. Works with one or two horizontal dimensions and additional (time) dimensions. Dimensions are supposed to be ordered horizontal, vertical, other dimensions You must either provide the index for the level of no motion or ssh eta. NOTE THAT THE LEVEL IS AN INDEX NUMBER FOR THE MOMENT Dimensions of ssh must be the same as rhop in which vertical dimension has been taken out If you force fillin=false, then you must have created the density array without missing values outside of this call, as well as ssh if you provide it.\n\n\n\n"
+},
+
+{
+    "location": "index.html#GFD-1",
+    "page": "Sea-water properties",
+    "title": "GFD",
+    "category": "section",
+    "text": "geostrophy(mask::BitArray,rhop,pmnin,xiin;dim::Integer=0,ssh=(),znomotion=0,fillin=true)"
+},
+
+{
     "location": "index.html#Data-download-1",
     "page": "Sea-water properties",
     "title": "Data download",
