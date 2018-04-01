@@ -50,6 +50,23 @@ gausswin(N, α = 2.5)
 gaussfilter(x,N)
 ```
 
+# Earth
+
+```@docs
+coriolisfrequency(latitude)
+```
+
+```@docs
+earthgravity(latitude)
+```
+
+# GFD
+
+```@docs
+geostrophy(mask::BitArray,rhop,pmnin,xiin;dim::Integer=0,ssh=(),znomotion=0,fillin=true)
+```
+
+
 
 # Data download
 
