@@ -66,17 +66,17 @@ earthgravity(latitude)
 integraterhoprime(rhop,z)
 ```
 
-
 ```@docs
 stericheight(rhoi,z,zlevel,dim::Integer=0)
 ```
-
-
 
 ```@docs
 geostrophy(mask::BitArray,rhop,pmnin,xiin;dim::Integer=0,ssh=(),znomotion=0,fillin=true)
 ```
 
+```@docs
+streamfunctionvolumeflux(mask::BitArray,velocities,pmnin,xiin;dim::Integer=0)
+```
 
 
 # Data download
