@@ -9,7 +9,9 @@
 [![documentation stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://gher-ulg.github.io/PhysOcean.jl/stable/)
 [![documentation latest](https://img.shields.io/badge/docs-latest-blue.svg)](https://gher-ulg.github.io/PhysOcean.jl/latest/)
 
+# Content
 
+You will find here some general tools for Physical Oceanography (state equations, bulk formulas, geostrophic velocity calculations ...). 
 
 # Installing
 
