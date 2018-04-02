@@ -161,11 +161,19 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "index.html#PhysOcean.streamfunctionvolumeflux-Tuple{BitArray,Any,Any,Any}",
+    "page": "Sea-water properties",
+    "title": "PhysOcean.streamfunctionvolumeflux",
+    "category": "method",
+    "text": "psifluxes=streamfunctionvolumeflux(mask::BitArray,velocities,pmnin,xiin;dim::Integer=0)\n\nInput:\n\nmask : Boolean array with true in water and false on land. \nvelocities : tuple of arrays on the same grid as the mask. Each tuple element is a velocity field normal to the corresponding direction in space\npmnin: tuple of metrics as in divand, but to get velocities in m/s the metrics need to be in per meters too.\nxiin: tuple position of the grid points.\ndim : optional paramter telling which index in the arrays corresponds to the vertical direction. By default 0 uses the last index\n\nOutput:\n\npsifluxes tuple of volume fluxes at each depth and direction NORMAL and to the left of each coordinate line\n\nCalculates volume flux streamfunction calculated from the surface. The value of this field provides the total flow (in Sverdrup) across the section above the depth of the zlevel looked at. \n\n\n\n"
+},
+
+{
     "location": "index.html#GFD-1",
     "page": "Sea-water properties",
     "title": "GFD",
     "category": "section",
-    "text": "integraterhoprime(rhop,z)stericheight(rhoi,z,zlevel,dim::Integer=0)geostrophy(mask::BitArray,rhop,pmnin,xiin;dim::Integer=0,ssh=(),znomotion=0,fillin=true)"
+    "text": "integraterhoprime(rhop,z)stericheight(rhoi,z,zlevel,dim::Integer=0)geostrophy(mask::BitArray,rhop,pmnin,xiin;dim::Integer=0,ssh=(),znomotion=0,fillin=true)streamfunctionvolumeflux(mask::BitArray,velocities,pmnin,xiin;dim::Integer=0)"
 },
 
 {
