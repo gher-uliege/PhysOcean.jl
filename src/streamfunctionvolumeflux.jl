@@ -19,6 +19,8 @@
 * `psifluxes` tuple of volume fluxes at each depth and direction NORMAL and to the left of each coordinate line
 
 
+Calculates volume flux streamfunction calculated from the surface. The value of this field provides the total flow (in Sverdrup) across the section above the depth of the zlevel looked at. 
+
 """
 
 function streamfunctionvolumeflux(mask::BitArray,velocities,pmnin,xiin;dim::Integer=0)
@@ -30,22 +32,22 @@ end
 
 
 # snippets from https://julialang.org/blog/2016/02/iteration
-function sumalongdims(A, dims)
-    sz = [size(A)...]
-    sz[[dims...]] = 1
-    #B = Array(eltype(A), sz...)
-	B = Array{eltype(A)}(sz...)
-    sumalongdims!(B, A)
-end
-@noinline function sumalongdims!(B, A)
-    # It's assumed that B has size 1 along any dimension that we're summing
-    fill!(B, 0)
-    Bmax = CartesianIndex(size(B))
-    for I in CartesianRange(size(A))
-        B[min(Bmax,I)] += A[I]
-    end
-    B
-end
+# function sumalongdims(A, dims)
+    # sz = [size(A)...]
+    # sz[[dims...]] = 1
+    # #B = Array(eltype(A), sz...)
+	# B = Array{eltype(A)}(sz...)
+    # sumalongdims!(B, A)
+# end
+# @noinline function sumalongdims!(B, A)
+    # # It's assumed that B has size 1 along any dimension that we're summing
+    # fill!(B, 0)
+    # Bmax = CartesianIndex(size(B))
+    # for I in CartesianRange(size(A))
+        # B[min(Bmax,I)] += A[I]
+    # end
+    # B
+# end
 
 
 

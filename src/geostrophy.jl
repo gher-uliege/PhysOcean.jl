@@ -258,7 +258,7 @@ dummy=integraterhoprime(VN./pmnin[i],xiin[dim],dim)
 
 # now take deepast value for VN which is the integral
 
-hjm=deepestpoint(mask,dummy)
+#hjm=deepestpoint(mask,dummy)
 
 #@show size(dummy[ind1...]),size(hjm)
 

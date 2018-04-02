@@ -173,7 +173,12 @@ using Base.Test
 	dens=density.(salt,temp,0)-1025;
 	velocities,eta,Vflux=geostrophy(mask,dens,(pm,pn,po),(xi,yi,zi);znomotion=3);
 	@test var(eta) ≈ 0.00045683197717526355
+	velocities,eta,Vflux=geostrophy(mask,dens,(pm,pn,po),(xi,yi,zi);ssh=eta);
+	@test var(eta) ≈ 0.00045683197717526355
 	
+	psi=streamfunctionvolumeflux(mask,velocities,(pm,pn,po),(xi,yi,zi))
+	
+	@test mean(psi[1]) ≈ -0.06242550029999892
 	
 	
 
