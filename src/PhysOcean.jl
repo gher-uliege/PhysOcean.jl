@@ -396,8 +396,9 @@ include("deepestpoint.jl")
 include("floodfill!.jl")
 include("addlowtoheighdimension.jl")
 include("geostrophy.jl")
+include("streamfunctionvolumeflux.jl")
 
-export nanmean, nansum, gausswin, vaporpressure, solarflux, sensibleflux, gaussfilter, longwaveflux, latentflux, datetime_matlab, freezing_temperature, density, secant_bulk_modulus, coriolisfrequency, earthgravity, integraterhoprime, stericheight, deepestpoint, floodfill!, addlowtoheighdimension, geostrophy
+export nanmean, nansum, gausswin, vaporpressure, solarflux, sensibleflux, gaussfilter, longwaveflux, latentflux, datetime_matlab, freezing_temperature, density, secant_bulk_modulus, coriolisfrequency, earthgravity, integraterhoprime, stericheight, deepestpoint, floodfill!, addlowtoheighdimension, geostrophy, streamfunctionvolumeflux
 
 include("castaway.jl")
 export loadcastaway
