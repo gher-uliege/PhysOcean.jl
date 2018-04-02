@@ -141,7 +141,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Sea-water properties",
     "title": "PhysOcean.integraterhoprime",
     "category": "method",
-    "text": "rhoi = integraterhoprime(rhop,z);\n\nIntegrates density anomalies over depth. When used with gravity, assuming gravity is independant on z, it can be used to calculate dynamic pressure up to a constant. Function can be used with 1D, 2D, ...\n\nInput:\n\nrhop: density anomaly array\nz: vertical position array. Zero at surface and positive downward, same dimensions as rhop\ndim: along which dimension depth is found and integral is performed. If not provided, last dimension is taken\n\nOutput:\n\nrhoi : Integrated value to the same levels as on which rhop where given. So basically total density anomaly ABOVE the current depth\n\nNote:\n\nCompute vertical integral of density anomalies\n\n\n\n"
+    "text": "Compute vertical integral of density anomalies\n\nrhoi = integraterhoprime(rhop,z);\n\nIntegrates density anomalies over depth. When used with gravity, assuming gravity is independant on z, it can be used to calculate dynamic pressure up to a constant. Function can be used with 1D, 2D, ...\n\nInput:\n\nrhop: density anomaly array\nz: vertical position array. Zero at surface and positive downward, same dimensions as rhop\ndim: along which dimension depth is found and integral is performed. If not provided, last dimension is taken\n\nOutput:\n\nIntegrated value to the same levels as on which rhop where given. So basically total density anomaly ABOVE the current depth\n\nNote:\n\n\n\n"
 },
 
 {
@@ -149,7 +149,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Sea-water properties",
     "title": "PhysOcean.stericheight",
     "category": "function",
-    "text": "ssh=stericheight(rhoi,z,zlevel,dim::Integer=0)\n\nInput:\n\nrhoi: integrated density anomalies (from a call to integraterhoprime)\nz: array of vertical positions\nzlevel: integer for the zlevel on which no motion is assumed\ndim: along which dimension depth is found . If not provided last dimension is used\n\nOutput:\n\nssh: steric height. space dimensions as for rhoi in which direction dim is taken out\n\nCompute steric height with respect to given depth level presently provided as index , not depth\n\n\n\n"
+    "text": "Compute steric height with respect to given depth level presently provided as index , not depth\n\nInput:\n\nrhoi: integrated density anomalies (from a call to integraterhoprime)\nz: array of vertical positions\nzlevel: integer for the zlevel on which no motion is assumed\ndim: along which dimension depth is found . If not provided last dimension is used\n\nOutput:\n\nssh: steric height. Dimensions as for rhoi in which direction dim is taken out\n\nNote:\n\n\n\n"
 },
 
 {
