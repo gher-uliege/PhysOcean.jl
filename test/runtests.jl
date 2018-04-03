@@ -180,6 +180,18 @@ using Base.Test
 	
 	@test mean(psi[1]) ≈ -0.06242550029999892
 	
+	mask[2,3,:]=false
+	eta1=eta[1,1]
+	psi11=psi[1][1,1]
+	velocities,eta,Vflux=geostrophy(mask,dens,(pm,pn,po),(xi,yi,zi);znomotion=3);
+	@test eta1 ≈ eta[1,1]
+	velocities,eta,Vflux=geostrophy(mask,dens,(pm,pn,po),(xi,yi,zi);ssh=eta);
+	@test eta1 ≈ eta[1,1]
+	
+	psi=streamfunctionvolumeflux(mask,velocities,(pm,pn,po),(xi,yi,zi))
+	
+	@test psi11 ≈ psi[1][1,1]
+	
 	
 
     include("test_cmems.jl")
