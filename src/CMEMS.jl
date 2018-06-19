@@ -3,8 +3,8 @@ module CMEMS
 using NCDatasets
 using DataArrays
 
-const no_qc_performed = 0                          
-const good_data = 1                                 
+const no_qc_performed = 0
+const good_data = 1
 const probably_good_data = 2
 const bad_data_that_are_potentially_correctable = 3
 const bad_data = 4
@@ -185,16 +185,16 @@ end
 """
     CMEMS.download(lonr,latr,timerange,param,username,password,basedir[; indexURLs = ...])
 
-Download in situ data within the longitude range `lonr` (an array or tuple with 
+Download in situ data within the longitude range `lonr` (an array or tuple with
 two elements: the minimum longitude and the maximum longitude), the latitude
-range `latr` (likewise), time range `timerange` (an array or tuple with two `DateTime` 
+range `latr` (likewise), time range `timerange` (an array or tuple with two `DateTime`
 structures: the starting date and the end date) from the CMEMS (Copernicus
-Marine environment monitoring service) in situ service [^1].  
+Marine environment monitoring service) in situ service [^1].
 `param` is one of the parameter codes as defined in [^2] or [^3].
-`username` and `password` are the credentials to access data [^1] and `basedir` 
+`username` and `password` are the credentials to access data [^1] and `basedir`
 is the directory under which the data is saved. `indexURLs` is a list of the URL
 to the `index_history.txt` file. Per default, it includes the URLs of the
-Baltic, Arctic, North West Shelf, Iberian, Mediteranean and Black Sea Thematic 
+Baltic, Arctic, North West Shelf, Iberian, Mediteranean and Black Sea Thematic
 Assembly Center.
 
 As these URLs might change, the latest version of the URLs to the indexes can be
@@ -229,7 +229,7 @@ function download(lonr,latr,timerange,param,username,password,basedir;
                        # North West Shelf
                        "ftp://myocean.bsh.de/Core/INSITU_NWS_TS_REP_OBSERVATIONS_013_043/index_history.txt",
                        # IBI
-                       "ftp://arcas.puertos.es/Core/INSITU_IBI_TS_REP_OBSERVATIONS_013_040/index_history.txt",                       
+                       "ftp://arcas.puertos.es/Core/INSITU_IBI_TS_REP_OBSERVATIONS_013_040/index_history.txt",
                        # Mediteranean Sea
                        "ftp://medinsitu.hcmr.gr/Core/INSITU_MED_TS_REP_OBSERVATIONS_013_041/index_history.txt",
                        # Black Sea
@@ -258,7 +258,7 @@ function download!(index,lonr,latr,timerange,param,username,password,basedir,fil
                   download = download,
                   skipifpresent = true
                    )
-    
+
     for (url,
          localname,
          geospatial_lat_min,
@@ -271,23 +271,23 @@ function download!(index,lonr,latr,timerange,param,username,password,basedir,fil
         # selection based on coordinate
         if ((lonr[1] <= geospatial_lon_max) && (geospatial_lon_min <= lonr[end]) &&
             (latr[1] <= geospatial_lat_max) && (geospatial_lat_min <= latr[end]))
-                
+
             # selection based on time
 
             if (timerange[1] <= time_coverage_end) && (time_coverage_start <= timerange[2])
                 parameters = split(parameter)
-                
+
                 # selection based on parameter
                 if param in parameters
                     #@show catalog_id, url, geospatial_lat_min, geospatial_lat_max, geospatial_lon_min, geospatial_lon_max, time_coverage_start, time_coverage_end, provider, date_update, data_mode, parameter
                     abslocalname = joinpath(basedir,localname)
                     dir = splitdir(abslocalname)[1]
                     mkpath(dir)
-                    
+
                     if !isfile(abslocalname) || !skipifpresent
                         downloadpw(url,username,password,log,download,abslocalname)
                     end
-                    
+
                     push!(files,localname)
                 end
             end
@@ -302,7 +302,7 @@ end
                    qfname = param * "_QC",
                    )
 
-Load the NetCDF variable `param` from the NCDataset `ds`. 
+Load the NetCDF variable `param` from the NCDataset `ds`.
 Data points not having the provide quality flags will be masked by `fillvalue`.
 `qfname` is the NetCDF variable name for the quality flags.
 
@@ -317,23 +317,23 @@ function loadvar(ds,param;
         #@show "no data for",param
         return T[]
     end
-    
+
     dataarray = ds[param][:]
     data = fill(fillvalue,size(dataarray))
     data[.!ismissing.(dataarray)] =  dataarray.data[.!ismissing.(dataarray)]
-       
+
     if qfname in ds
         qf = ds[qfname].var[:]
 
         keep_data = falses(size(qf))
-        
+
         for flag in qualityflags
             keep_data[:] =  keep_data .| (qf .== flag)
         end
 
         data[(.!keep_data)] = fillvalue
     end
-    
+
     return data
 end
 
@@ -347,7 +347,7 @@ function load(T,fname::TS,param; qualityflags = [good_data, probably_good_data])
     fillvalueDT = DateTime(1000,1,1)
 
     #@show fname
-    
+
     ds = Dataset(fname)
     data = loadvar(ds,param;
                    fillvalue = fillvalue,
@@ -362,7 +362,7 @@ function load(T,fname::TS,param; qualityflags = [good_data, probably_good_data])
         @assert size(lon,1) == size(data,2)
         lon = repmat(reshape(lon,1,size(lon,1)),size(data,1),1)
     end
-    
+
     lat = loadvar(ds,"LATITUDE";
                   fillvalue = fillvalue,
                   qfname = "POSITION_QC",
@@ -383,7 +383,7 @@ function load(T,fname::TS,param; qualityflags = [good_data, probably_good_data])
                     fillvalue = fillvalue,
                     qualityflags = qualityflags)
         end
-    
+
     time = loadvar(ds,"TIME";
                    fillvalue = fillvalueDT,
                    qualityflags = qualityflags)
@@ -398,12 +398,12 @@ function load(T,fname::TS,param; qualityflags = [good_data, probably_good_data])
 
     return data,lon,lat,z,time,ids
 end
-    
+
 """
     data,lon,lat,z,time,ids = CMEMS.load(T,fnames,param; qualityflags = ...)
 
-Load all data in the vector of file names `fnames` corresponding to the parameter 
-`param` as the data type `T`. Only the data with the quality flags 
+Load all data in the vector of file names `fnames` corresponding to the parameter
+`param` as the data type `T`. Only the data with the quality flags
 `CMEMS.good_data` and `CMEMS.probably_good_data` are loaded per default.
 The output parameters correspondata to the data, longitude, latitude,
 depth, time (as `DateTime`) and an identifier (as `String`).
@@ -419,7 +419,7 @@ function load(T,fnames::Vector{TS},param;
     z = T[]
     time = DateTime[]
     ids = String[]
-    
+
     for fname in fnames
         data_,lon_,lat_,z_,time_,ids_ = load(T,fname,param;
                                              qualityflags = qualityflags)
@@ -428,13 +428,13 @@ function load(T,fnames::Vector{TS},param;
         for i = 1:length(data_)
             good[i] = !(isnan(data_[i]) || isnan(lon_[i]) || isnan(lat_[i]) || isnan(z_[i]) || time_[i] == fillvalueDT)
         end
-        
+
         append!(data,data_[good])
         append!(lon,lon_[good])
         append!(lat,lat_[good])
         append!(z,z_[good])
         append!(time,time_[good])
-        append!(ids,ids_[good])        
+        append!(ids,ids_[good])
     end
 
     return data,lon,lat,z,time,ids
