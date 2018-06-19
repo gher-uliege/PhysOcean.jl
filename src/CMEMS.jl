@@ -19,6 +19,169 @@ const fillvalueDT = DateTime(1000,1,1)
 #indexfname = download("ftp://$(username):$(password)@medinsitu.hcmr.gr/Core/INSITU_MED_TS_REP_OBSERVATIONS_013_041/index_history.txt")
 
 
+type IndexFile{T}
+    index::Array{Any,2}
+    dateformat::T
+end
+
+function IndexFile(io::IO)
+    index = readdlm(io,','; comment_char = '#')
+
+    dateformat = DateFormat("y-m-dTH:M:SZ")
+    return IndexFile(index,dateformat)
+end
+
+function parsetime(str,dateformat)
+    #MYO-BLACKSEA-01,ftp://vftpmo.io-bas.bg/Core/INSITU_BS_TS_REP_OBSERVATIONS_013_042/history/mooring/BS_TS_MO_CG.nc,43.8022,43.8022,28.6025,28.6025,2016-01-01T00:15:00Z,2016-12-31T23:45:00ZZ,Institutul National de Cercetare-Dezvoltare pentru Geologie si Geoecologie Marina (GeoEcoMar) Romania,2017-03-03T09:23:50Z,R,DEPH TEMP CNDC FLU2 DOX1 ATMS DRYT WSPD WDIR GSPD HCSP HCDT
+    if contains(str,"ZZ")
+        return DateTime(replace(str,"ZZ","Z"),dateformat)
+    else
+        return DateTime(str,dateformat)
+    end
+end
+
+Base.length(iter::IndexFile) = size(iter.index,1)
+
+Base.start(iter::IndexFile) = 0
+
+function Base.next(iter::IndexFile,i)
+    i = i+1
+
+    # ignore bogous time
+    while (iter.index[i,7] == "TZ") || (iter.index[i,7] == "TZ")
+        i = i+1
+    end
+
+    catalog_id          = iter.index[i,1] :: SubString{String}
+    url                 = iter.index[i,2] :: SubString{String}
+    geospatial_lat_min  = Float64(iter.index[i,3])
+    geospatial_lat_max  = Float64(iter.index[i,4])
+    geospatial_lon_min  = Float64(iter.index[i,5])
+    geospatial_lon_max  = Float64(iter.index[i,6])
+    time_coverage_start = parsetime(iter.index[i,7],iter.dateformat)
+    time_coverage_end   = parsetime(iter.index[i,8],iter.dateformat)
+    provider            = iter.index[i,9] :: SubString{String}
+    date_update         = iter.index[i,10] :: SubString{String}
+    data_mode           = iter.index[i,11] :: SubString{String}
+    parameter           = iter.index[i,12] :: SubString{String}
+
+
+    localname = replace(url,r"^.*://","")
+
+    #@show i,url
+
+    return ((url,
+             localname,
+             geospatial_lat_min,
+             geospatial_lat_max,
+             geospatial_lon_min,
+             geospatial_lon_max,
+             time_coverage_start,
+             time_coverage_end,
+             parameter),i)
+end
+Base.done(iter::IndexFile,i) = i == size(iter.index,1)
+
+
+
+
+type IndexFileCSV{T}
+    index::Array{Any,2}
+    baseurl::String
+    iparam::Int
+    ifilename::Int
+    igeo_lat_min::Int
+    igeo_lat_max::Int
+    igeo_long_min::Int
+    igeo_long_max::Int
+    itime_coverage_start::Int
+    itime_coverage_end::Int
+    imonthly_family::Int
+    dateformat::T
+end
+
+Base.length(iter::IndexFileCSV) = size(iter.index,1)
+
+function IndexFileCSV(io::IO,baseurl::AbstractString)
+    index, header = readdlm(io,','; header = true, comment_char = '#')
+
+    # PARAM,CATEGORY,CATALOG_ID,FILENAME,DAC,GEO_LAT_MIN,GEO_LAT_MAX,GEO_LONG_MIN,GEO_LONG_MAX,TIME_COVERAGE_START,TIME_COVERAGE_END,PROVIDER,DATE_UPDATE,DATA_MODE,PARAMETERS,PLATFORM,WMO_PLATFORM_CODE,LAST_LATITUDE_OBSERVATION,LAST_LONGITUDE_OBSERVATION,DATE_CREATION_DU,DATE_UPDATE_DU,LAST_DATE_OBSERVATION,MONTHLY_FAMILY,FILE_DELETION,PSAL_GOOD_QC,TEMP_GOOD_QC,INSTITUTION_EDMO_CODE
+
+    iparam = findfirst("PARAM" .== header)
+    ifilename = findfirst("FILENAME" .== header)
+    igeo_lat_min = findfirst("GEO_LAT_MIN" .== header)
+    igeo_lat_max = findfirst("GEO_LAT_MAX" .== header)
+    igeo_long_min = findfirst("GEO_LONG_MIN" .== header)
+    igeo_long_max = findfirst("GEO_LONG_MAX" .== header)
+    itime_coverage_start = findfirst("TIME_COVERAGE_START" .== header)
+    itime_coverage_end = findfirst("TIME_COVERAGE_END" .== header)
+    imonthly_family = findfirst("MONTHLY_FAMILY" .== header)
+    df = dateformat"dd/mm/yyyy HH:MM:SS"
+
+    return IndexFileCSV(index,baseurl,iparam,
+                        ifilename,
+                        igeo_lat_min,
+                        igeo_lat_max,
+                        igeo_long_min,
+                        igeo_long_max,
+                        itime_coverage_start,
+                        itime_coverage_end,
+                        imonthly_family,
+                        df)
+
+end
+
+Base.start(iter::IndexFileCSV) = 0
+
+function Base.next(iter::IndexFileCSV,i)
+    i = i+1
+
+    filename           = iter.index[i,iter.ifilename] :: SubString{String}
+    monthly_family = iter.index[i,iter.imonthly_family] :: SubString{String}
+
+    localname = joinpath(monthly_family,filename)
+
+    url = iter.baseurl * localname
+    geospatial_lat_min  = Float64(iter.index[i,iter.igeo_lat_min])
+    geospatial_lat_max  = Float64(iter.index[i,iter.igeo_lat_max])
+    geospatial_lon_min  = Float64(iter.index[i,iter.igeo_long_min])
+    geospatial_lon_max  = Float64(iter.index[i,iter.igeo_long_max])
+    time_coverage_start = DateTime(iter.index[i,iter.itime_coverage_start],iter.dateformat)
+    time_coverage_end   = DateTime(iter.index[i,iter.itime_coverage_end],iter.dateformat)
+    parameter           = iter.index[i,iter.iparam] :: SubString{String}
+
+    #@show i,filename,url,localname
+
+    return ((url,
+             localname,
+             geospatial_lat_min,
+             geospatial_lat_max,
+             geospatial_lon_min,
+             geospatial_lon_max,
+             time_coverage_start,
+             time_coverage_end,
+             parameter),i)
+end
+Base.done(iter::IndexFileCSV,i) = i == size(iter.index,1)
+
+
+function downloadpw(URL,username,password,log,mydownload,localname = tempname())
+        print(log,"Downloading ");
+        print_with_color(:green,log,URL)
+        print(log,"\n")
+
+        if startswith(URL,"ftp")
+            mydownload(replace(URL,r"^ftp://","ftp://$(username):$(password)@"),localname)
+        elseif startswith(URL,"https")
+            mydownload(replace(URL,r"^https://","https://$(username):$(password)@"),localname)
+        else
+            mydownload(replace(URL,r"^http://","http://$(username):$(password)@"),localname)
+        end
+
+        return localname
+end
+
+
 """
     CMEMS.download(lonr,latr,timerange,param,username,password,basedir[; indexURLs = ...])
 
@@ -56,6 +219,7 @@ julia> files = CMEMS.download(lonr,latr,timerange,param,username,password,basedi
 
 """
 
+
 function download(lonr,latr,timerange,param,username,password,basedir;
                   indexURLs = [
                        # Baltic
@@ -72,98 +236,63 @@ function download(lonr,latr,timerange,param,username,password,basedir;
                        "ftp://vftpmo.io-bas.bg/Core/INSITU_BS_TS_REP_OBSERVATIONS_013_042/index_history.txt"
                    ],
                   log = STDOUT,
-                  download = Base.download,
-                  skipifpresent = true
-                   )
-
-    const dateformat = DateFormat("y-m-dTH:M:SZ")
-
-    function parsetime(str)
-        #MYO-BLACKSEA-01,ftp://vftpmo.io-bas.bg/Core/INSITU_BS_TS_REP_OBSERVATIONS_013_042/history/mooring/BS_TS_MO_CG.nc,43.8022,43.8022,28.6025,28.6025,2016-01-01T00:15:00Z,2016-12-31T23:45:00ZZ,Institutul National de Cercetare-Dezvoltare pentru Geologie si Geoecologie Marina (GeoEcoMar) Romania,2017-03-03T09:23:50Z,R,DEPH TEMP CNDC FLU2 DOX1 ATMS DRYT WSPD WDIR GSPD HCSP HCDT
-        if contains(str,"ZZ")
-            return DateTime(replace(str,"ZZ","Z"),dateformat)            
-        else
-            return DateTime(str,dateformat)
-        end
-    end
-    
-    function downloadpw(URL,localname = tempname())
-        print(log,"Downloading ");
-        print_with_color(:green,log,URL)
-        print(log,"\n")
-        
-        if startswith(URL,"ftp")
-            download(replace(URL,r"^ftp://","ftp://$(username):$(password)@"),localname)
-        elseif startswith(URL,"https")
-            download(replace(URL,r"^https://","https://$(username):$(password)@"),localname)
-        else
-            download(replace(URL,r"^http://","http://$(username):$(password)@"),localname)
-        end
-
-        return localname
-    end
+                  download = download,
+                  kwargs...)
 
     files = String[]
-    
+
     for indexURL in indexURLs
+        indexfname = downloadpw(indexURL,username,password,log,download)
+        open(indexfname) do f
+            download!(IndexFile(f),lonr,latr,timerange,param,username,password,basedir,files;
+                      log = log,
+                      download = download,
+                      kwargs...)
+        end
+    end
+    return files
+end
 
-        indexfname = downloadpw(indexURL)        
-        #open(indexfname) do f
-        f = open(indexfname);
-        index = readdlm(f,','; comment_char = '#')
-        close(f)
-
-        for i = 1:size(index,1)
-            catalog_id          = index[i,1] :: SubString{String}
-            file_name           = index[i,2] :: SubString{String}
-            geospatial_lat_min  = Float64(index[i,3])
-            geospatial_lat_max  = Float64(index[i,4])
-            geospatial_lon_min  = Float64(index[i,5])
-            geospatial_lon_max  = Float64(index[i,6])
-            time_coverage_start = index[i,7] :: SubString{String}
-            time_coverage_end   = index[i,8] :: SubString{String}
-            provider            = index[i,9] :: SubString{String}
-            date_update         = index[i,10] :: SubString{String}
-            data_mode           = index[i,11] :: SubString{String}
-            parameter           = index[i,12] :: SubString{String}
-            
-            # selection based on coordinate
-            if ((lonr[1] <= geospatial_lon_max) && (geospatial_lon_min <= lonr[end]) &&
-                (latr[1] <= geospatial_lat_max) && (geospatial_lat_min <= latr[end]))
+function download!(index,lonr,latr,timerange,param,username,password,basedir,files;
+                  log = STDOUT,
+                  download = download,
+                  skipifpresent = true
+                   )
+    
+    for (url,
+         localname,
+         geospatial_lat_min,
+         geospatial_lat_max,
+         geospatial_lon_min,
+         geospatial_lon_max,
+         time_coverage_start,
+         time_coverage_end,
+         parameter) in index
+        # selection based on coordinate
+        if ((lonr[1] <= geospatial_lon_max) && (geospatial_lon_min <= lonr[end]) &&
+            (latr[1] <= geospatial_lat_max) && (geospatial_lat_min <= latr[end]))
                 
-                # ignore bogous time
-                if (time_coverage_start != "TZ") && (time_coverage_end != "TZ")
-                    # selection based on time
-                    
-                    time_start = parsetime(time_coverage_start)
-                    time_end = parsetime(time_coverage_end)
-                    
-                    if (timerange[1] <= time_end) && (time_start <= timerange[2])
-                        parameters = split(parameter)
-                        
-                        # selection based on parameter
-                        if param in parameters
-                            #@show catalog_id, file_name, geospatial_lat_min, geospatial_lat_max, geospatial_lon_min, geospatial_lon_max, time_coverage_start, time_coverage_end, provider, date_update, data_mode, parameter
+            # selection based on time
 
-                            
-                            parts = splitdir(replace(file_name,r"^.*://",""))
-                            localname = joinpath(basedir,parts...)
-                            dir = joinpath(basedir,parts[1:end-1]...)
-                            mkpath(dir)
-
-                            if !isfile(localname) || !skipifpresent
-                                downloadpw(file_name,localname)
-                            end
-                            
-                            push!(files,localname)
-                        end
-                    end                
+            if (timerange[1] <= time_coverage_end) && (time_coverage_start <= timerange[2])
+                parameters = split(parameter)
+                
+                # selection based on parameter
+                if param in parameters
+                    #@show catalog_id, url, geospatial_lat_min, geospatial_lat_max, geospatial_lon_min, geospatial_lon_max, time_coverage_start, time_coverage_end, provider, date_update, data_mode, parameter
+                    abslocalname = joinpath(basedir,localname)
+                    dir = splitdir(abslocalname)[1]
+                    mkpath(dir)
+                    
+                    if !isfile(abslocalname) || !skipifpresent
+                        downloadpw(url,username,password,log,download,abslocalname)
+                    end
+                    
+                    push!(files,localname)
                 end
             end
         end
     end
-
-    return files
 end
 
 """
