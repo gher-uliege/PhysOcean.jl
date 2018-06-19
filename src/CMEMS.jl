@@ -141,7 +141,7 @@ function Base.next(iter::IndexFileCSV,i)
 
     localname = joinpath(monthly_family,filename)
 
-    url = iter.baseurl * localname
+    url = iter.baseurl * monthly_family * "/" * filename
     geospatial_lat_min  = Float64(iter.index[i,iter.igeo_lat_min])
     geospatial_lat_max  = Float64(iter.index[i,iter.igeo_lat_max])
     geospatial_lon_min  = Float64(iter.index[i,iter.igeo_long_min])
@@ -236,7 +236,7 @@ function download(lonr,latr,timerange,param,username,password,basedir;
                        "ftp://vftpmo.io-bas.bg/Core/INSITU_BS_TS_REP_OBSERVATIONS_013_042/index_history.txt"
                    ],
                   log = STDOUT,
-                  download = download,
+                  download = Base.download,
                   kwargs...)
 
     files = String[]
@@ -255,7 +255,7 @@ end
 
 function download!(index,lonr,latr,timerange,param,username,password,basedir,files;
                   log = STDOUT,
-                  download = download,
+                  download = Base.download,
                   skipifpresent = true
                    )
 
@@ -346,12 +346,15 @@ function load(T,fname::TS,param; qualityflags = [good_data, probably_good_data])
     fillvalue = NaN
     fillvalueDT = DateTime(1000,1,1)
 
-    #@show fname
-
     ds = Dataset(fname)
+
     data = loadvar(ds,param;
                    fillvalue = fillvalue,
                    qualityflags = qualityflags)
+
+    if isempty(data)
+        return data,T[],T[],T[],DateTime[],String[]
+    end
 
     lon = loadvar(ds,"LONGITUDE";
                   fillvalue = fillvalue,
