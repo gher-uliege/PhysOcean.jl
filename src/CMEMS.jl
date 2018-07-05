@@ -318,9 +318,7 @@ function loadvar(ds,param;
         return T[]
     end
 
-    dataarray = ds[param][:]
-    data = fill(fillvalue,size(dataarray))
-    data[.!ismissing.(dataarray)] =  dataarray.data[.!ismissing.(dataarray)]
+    data = nomissing(ds[param][:],fillvalue)
 
     if qfname in ds
         qf = ds[qfname].var[:]
@@ -445,5 +443,3 @@ end
 
 
 end
-
-

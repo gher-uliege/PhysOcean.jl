@@ -5,12 +5,11 @@ import Requests
 using AbstractTrees
 import Gumbo
 import Glob
-import DataArrays
 
 """
     extracttar(tarname,dirname)
 
-`tarname` is a tar.gz file to be extract to `dirname`. 
+`tarname` is a tar.gz file to be extract to `dirname`.
 """
 
 function extracttar(tarname,dirname)
@@ -27,7 +26,7 @@ Extract a list for tar archives (one per probe/platform) from the World Ocean Da
 """
 function extract(tarnames,basedir)
     dirnames = Vector{String}(length(tarnames))
-    
+
     for i = 1:length(tarnames)
         probe = split(tarnames[i],".")[3]
         dirnames[i] = joinpath(basedir,probe)
@@ -40,9 +39,9 @@ function extract(tarnames,basedir)
     indexnames = [joinpath(dirnames[i],replace(basename(tarnames[i]),".tar.gz",".nc")) for i = 1:length(tarnames)]
 
     return dirnames,indexnames
-end    
+end
 
-""" 
+"""
     savereq(r,fname)
 
 Save the body request `r` to the file `fname` for debugging.
@@ -61,7 +60,7 @@ end
 
 Download data using the NODC web-service. The range parameters are vectors
 from with the frist element is the lower bound and the last element is the upper
-bound. The parameters of the functions will 
+bound. The parameters of the functions will
 be transmitted to nodc.noaa.gov (http://www.noaa.gov/privacy.html).
 Note that no XBT corrections are applied.
 The table below show the avialable variable and their units.
@@ -112,37 +111,37 @@ function download(lonrange,latrange,timerange,varname,email,basedir)
 
     # names from the WOD web portal
     variables = Dict(
-        "Temperature"							=>	"tem",		# °C                              
-        "Salinity"								=>	"sal",		# unitless                        
-        "Oxygen"								=>	"oxy",		# ml l⁻¹               
-        "Phosphate"								=>	"phos",		# µM                              
-        "Silicate"								=>	"sil",		# µM                              
-        "Nitrate and Nitrate+Nitrite"			=>	"nit",		# µM                              
-        "pH"									=>	"ph",		# unitless                        
-        "Chlorophyll"							=>	"chl",		# µg l⁻¹               
-        "Plankton"								=>	"bio",		# multiple                        
-        "Alkalinity"							=>	"alk",		# meq l⁻¹              
-        "Partial Pressure of Carbon Dioxide"	=>	"pco",		# µatm                            
-        "Dissolved Inorganic Carbon"			=>	"tco",		# mM                              
-        "Transmissivity"						=>	"bac",		# m⁻¹                  
-        "Pressure"								=>	"pres",		# dbar                            
-        "Air temperature"						=>	"ato",		# °C                              
-        "CO2 warming"							=>	"wco",		# °C                              
-        "CO2 atmosphere"						=>	"aco",		# ppm                             
-        "Air pressure"							=>	"airp",		# mbar                            
-        "Tritium"								=>	"tri",		# TU                              
-        "Helium"								=>	"he",		# nM                              
-        "Delta Helium-3"						=>	"dhe",		# %                               
-        "Delta Carbon-14"						=>	"dc14",		# <sup>o</sup>/<sub>oo</sub>      
-        "Delta Carbon-13"						=>	"dc13",		# <sup>o</sup>/<sub>oo</sub>      
-        "Argon"									=>	"ar",		# nM                              
-        "Neon"									=>	"ne",		# nM                              
-        "Chlorofluorocarbon 11 (CFC 11)"		=>	"cf11",		# pM                              
-        "Chlorofluorocarbon 12 (CFC 12)"		=>	"cf12",		# pM                              
-        "Chlorofluorocarbon 113 (CFC 113)"		=>	"cf113",	# pM                              
-        "Delta Oxygen-18"						=>	"doxy",		# <sup>o</sup>/<sub>              
+        "Temperature"							=>	"tem",		# °C
+        "Salinity"								=>	"sal",		# unitless
+        "Oxygen"								=>	"oxy",		# ml l⁻¹
+        "Phosphate"								=>	"phos",		# µM
+        "Silicate"								=>	"sil",		# µM
+        "Nitrate and Nitrate+Nitrite"			=>	"nit",		# µM
+        "pH"									=>	"ph",		# unitless
+        "Chlorophyll"							=>	"chl",		# µg l⁻¹
+        "Plankton"								=>	"bio",		# multiple
+        "Alkalinity"							=>	"alk",		# meq l⁻¹
+        "Partial Pressure of Carbon Dioxide"	=>	"pco",		# µatm
+        "Dissolved Inorganic Carbon"			=>	"tco",		# mM
+        "Transmissivity"						=>	"bac",		# m⁻¹
+        "Pressure"								=>	"pres",		# dbar
+        "Air temperature"						=>	"ato",		# °C
+        "CO2 warming"							=>	"wco",		# °C
+        "CO2 atmosphere"						=>	"aco",		# ppm
+        "Air pressure"							=>	"airp",		# mbar
+        "Tritium"								=>	"tri",		# TU
+        "Helium"								=>	"he",		# nM
+        "Delta Helium-3"						=>	"dhe",		# %
+        "Delta Carbon-14"						=>	"dc14",		# <sup>o</sup>/<sub>oo</sub>
+        "Delta Carbon-13"						=>	"dc13",		# <sup>o</sup>/<sub>oo</sub>
+        "Argon"									=>	"ar",		# nM
+        "Neon"									=>	"ne",		# nM
+        "Chlorofluorocarbon 11 (CFC 11)"		=>	"cf11",		# pM
+        "Chlorofluorocarbon 12 (CFC 12)"		=>	"cf12",		# pM
+        "Chlorofluorocarbon 113 (CFC 113)"		=>	"cf113",	# pM
+        "Delta Oxygen-18"						=>	"doxy",		# <sup>o</sup>/<sub>
     )
-    
+
     variable = variables[varname]
     # ## XBT corrections
 
@@ -164,10 +163,10 @@ function download(lonrange,latrange,timerange,varname,email,basedir)
 
     # unused when requesting NetCDF files!
     xbt_correction = 0
-    
+
     #file_name = "ocldb1504104170.6387"
     #probe_name = "OSD,CTD,XBT,MBT,PFL,DRB,MRB,APB,UOR,SUR,GLD"
-    
+
     r = Requests.post(URL; data = Dict("north" => north, "west" => west, "east" => east, "south" =>  south,
                               "yearstart" => Dates.year(datestart), "monthstart" => Dates.month(datestart), "daystart" => Dates.day(datestart),
                               "yearend" => Dates.year(dateend), "monthend" => Dates.month(dateend), "dayend" => Dates.day(dateend),
@@ -178,26 +177,26 @@ function download(lonrange,latrange,timerange,varname,email,basedir)
     savereq(r,"out2.html")
 
     doc = Gumbo.parsehtml(readstring(r))
-    
+
     data = Dict{String,String}("what" => "DOWNLOAD DATA")
-    
-    
-    
-    for elem in PreOrderDFS(doc.root); 
-        if isa(elem,Gumbo.HTMLElement); 
-            if Gumbo.tag(elem) == :input 
-                
-                a = Gumbo.attrs(elem); 
+
+
+
+    for elem in PreOrderDFS(doc.root);
+        if isa(elem,Gumbo.HTMLElement);
+            if Gumbo.tag(elem) == :input
+
+                a = Gumbo.attrs(elem);
                 if "name" in keys(a)
-                    
+
                     if a["name"]  in ["file_name","probe_name","query_results"]
                         data[a["name"]] = a["value"]
                         #@show a["name"],a["value"]
                     end
-                    
+
                 end
-            end; 
-        end; 
+            end;
+        end;
     end
 
     file_name = data["file_name"]
@@ -213,7 +212,7 @@ function download(lonrange,latrange,timerange,varname,email,basedir)
     #<input type="hidden" name="query_results" value=":2000:2001:1:1:1:1:0:10.0000:50.0000:30.0000:OSD,CTD,XBT,MBT,PFL,DRB,MRB,APB,UOR,SUR,GLD:::tem::::::::::" />
 
     #filename=$(grep 'input type="hidden" name="file_name"' out2.html | awk -F\" '{ print $6 }')
-    
+
 
     r = Requests.post(URLextract; data = data)
     #curl 'https://www.nodc.noaa.gov/cgi-bin/OC5/SELECT/dbextract.pl' -H 'Host: www.nodc.noaa.gov' -H 'User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:55.0) Gecko/20100101 Firefox/55.0' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Accept-Language: de,en-US;q=0.7,en;q=0.3' --compressed -H 'Content-Type: application/x-www-form-urlencoded' -H 'Referer: https://www.nodc.noaa.gov/cgi-bin/OC5/SELECT/dbsearch.pl' -H 'DNT: 1' -H 'Connection: keep-alive' -H 'Upgrade-Insecure-Requests: 1' --data "what=DOWNLOAD+DATA&file_name=$filename&probe_name=OSD%2CCTD%2CXBT%2CMBT%2CPFL%2CDRB%2CMRB%2CAPB%2CUOR%2CSUR%2CGLD&query_results=%3A$yearstart%3A$yearend%3A1%3A1%3A1%3A1%3A$west%3A$east%3A$north%3A$south%3AOSD%2CCTD%2CXBT%2CMBT%2CPFL%2CDRB%2CMRB%2CAPB%2CUOR%2CSUR%2CGLD%3A%3A%3A$tem%3A%3A%3A%3A%3A%3A%3A%3A%3A%3A" > out3.html
@@ -295,7 +294,7 @@ end
 """
      load(T,dirname,indexname,varname)
 
-Load all profiles with the NetCDF variable `varname` in `dirname` indexed with 
+Load all profiles with the NetCDF variable `varname` in `dirname` indexed with
 the NetCDF file `indexname`.
 T is the type (e.g. Float64) for numeric return values.
 """
@@ -320,7 +319,7 @@ Append to profiles,lons,lats,zs,times,ids
 function load!(dirname,indexname,varname,profiles,lons,lats,zs,times,ids)
     indexnc = NCDatasets.Dataset(indexname)
 
-    cast = indexnc["cast"][:].data :: Vector{Int32}
+    cast = nomissing(indexnc["cast"][:]) :: Vector{Int32}
 
     # WORLD OCEAN DATABASE 2013 USER’S MANUAL
     # page 39, doi:10.7289/V5DF6P53
@@ -347,26 +346,26 @@ function load!(dirname,indexname,varname,profiles,lons,lats,zs,times,ids)
                 time = nc["time"][:]
 
                 profileflag = nc["$(varname)_WODflag"][:]
-                sigfigs = nc["$(varname)_sigfigs"][:].data
+                sigfigs = nomissing(nc["$(varname)_sigfigs"][:])
                 # some date are flagged as accepted but have *_sigfigs equal
                 # to zero and bogus value
 
                 good = ((profileflag .== accepted)  .&
-                        (.!DataArrays.ismissing.(profile)) .&
-                        (.!DataArrays.ismissing.(z)) .&
+                        (.!ismissing.(profile)) .&
+                        (.!ismissing.(z)) .&
                         (sigfigs .> 0))
-                
+
                 sizegood = (sum(good),)
-                
-                append!(profiles,profile[good].data)
-                append!(zs,z[good].data)
+
+                append!(profiles,nomissing(profile[good]))
+                append!(zs,nomissing(z[good]))
                 append!(lons,fill(lon,sizegood))
                 append!(lats,fill(lat,sizegood))
                 append!(times,fill(time,sizegood))
                 append!(ids,fill(id,sizegood))
 
                 #@show length(profiles),length(zs)
-                
+
             end
         end
 
@@ -388,7 +387,7 @@ function load(T,dirnames::Vector{<:AbstractString},indexnames,varname)
     lats = T[]
     times = DateTime[]
     ids = String[]
-    
+
     for i = 1:length(dirnames)
         load!(dirnames[i],indexnames[i],varname,profiles,lons,lats,zs,times,ids)
     end
@@ -400,18 +399,18 @@ end
 """
     value,lon,lat,depth,obstime,id = WorldOceanDatabase.load(T,basedir::AbstractString,varname)
 
-Load a list profiles under the directory `basedir` assuming `basedir` was 
+Load a list profiles under the directory `basedir` assuming `basedir` was
 populated by `WorldOceanDatabase.download`.
 """
 function load(T,basedir::AbstractString,varname)
     # all directories under basedir
     dirnames = filter(isdir,[joinpath(basedir,d) for d in readdir(basedir)])
     # the files starting with ocldb (i.e. matching basedir/*/ocldb*)
-    
+
     indexnames = [joinpath(dirn,sort(filter(d -> startswith(d,"ocldb"),readdir(dirn)))[1]) for dirn in dirnames]
-    
-    return load(T,dirnames,indexnames,varname)    
+
+    return load(T,dirnames,indexnames,varname)
 end
-    
+
 
 end
