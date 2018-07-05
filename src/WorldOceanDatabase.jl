@@ -14,7 +14,7 @@ using Missings
 """
 function extracttar(tarname,dirname)
     if is_windows()
-        const exe7z = joinpath(JULIA_HOME, "7z.exe")
+        exe7z = joinpath(JULIA_HOME, "7z.exe")
         run(pipeline(`$exe7z x $tarname -y -so`, `$exe7z x -si -y -ttar -o$dirname`))
     else
         run(`tar xzf $(tarname) --directory=$(dirname)`)
@@ -352,7 +352,7 @@ function load!(dirname,indexname,varname,profiles,lons,lats,zs,times,ids)
 
     # WORLD OCEAN DATABASE 2013 USER’S MANUAL
     # page 39, doi:10.7289/V5DF6P53
-    const accepted = 0
+    accepted = 0
 
 
     for i = 1:length(cast)

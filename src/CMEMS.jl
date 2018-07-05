@@ -18,7 +18,7 @@ const fillvalueDT = DateTime(1000,1,1)
 #indexfname = download("ftp://$(username):$(password)@medinsitu.hcmr.gr/Core/INSITU_MED_TS_REP_OBSERVATIONS_013_041/index_history.txt")
 
 
-type IndexFile{T}
+mutable struct IndexFile{T}
     index::Array{Any,2}
     dateformat::T
 end
@@ -84,7 +84,7 @@ Base.done(iter::IndexFile,i) = i == size(iter.index,1)
 
 
 
-type IndexFileCSV{T}
+mutable struct IndexFileCSV{T}
     index::Array{Any,2}
     baseurl::String
     iparam::Int
