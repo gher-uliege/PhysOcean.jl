@@ -22,16 +22,21 @@ function loadcastaway(stream::IOStream)
 
     headerfound = false
     j = 1
-    data = Array{Float64,2}(0,0)
+    data = Array{Float64,2}(undef,0,0)
     header = ""
 
     for i = 1:length(lines)
         line = chomp(lines[i])
 
         if startswith(line,"% ")
-            keyvalue = replace(line,r"^% ","")
+            keyvalue =
+                if VERSION >= v"0.7.0-beta.0"
+                    replace(line,r"^% " => "")
+                else
+                    replace(line,r"^% ","")
+                end
 
-            if contains(keyvalue,",")
+            if occursin(",",keyvalue)
                 key,value = split(keyvalue,",",limit = 2)
 
                 if key == "Cast time (UTC)" || key == "Cast time (local)"

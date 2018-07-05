@@ -112,7 +112,7 @@ rhof=deepcopy(rhop)
 # If not asked for the field must have already been filled in by other means
 if fillin
 	BBB=deepcopy(rhop)
-	rhof[find(.~mask)]=NaN
+	rhof[find(.~mask)] .= NaN
 	#maybe better to floodfill in all directions EXCEPT vertically. So loop on layers and indexing ?
 	#floodfill!(rhof,B,NaN)
 	for iz=1:size(BBB)[dim]
@@ -134,7 +134,7 @@ if fillin
 	  #@show size(zzzz)
 	  zzzz[nanpos]=aaa[nanpos]
 	  isfixed=fill(true,size(aaa))
-	  isfixed[nanpos]=false
+	  isfixed[nanpos] .= false
 	  
 	  zzzz=myfilter3(zzzz,NaN,isfixed,20)
 	  aaa[nanpos]=zzzz[nanpos]
@@ -168,7 +168,7 @@ rhoi=integraterhoprime(rhof,xiin[dim],dim)
 		if fillin
 		 ind2 = [(j == dim ? (1) : (:)) for j = 1:ndims(mask)]
 		 # @show ind2
-		  ssh[find(.~mask[ind2...])]=NaN
+		  ssh[find(.~mask[ind2...])] .= NaN
 		 # @show ssh
 		 aaa=deepcopy(ssh)
 		 bbb=deepcopy(ssh)
@@ -180,7 +180,7 @@ rhoi=integraterhoprime(rhof,xiin[dim],dim)
 	    #@show size(zzzz)
 	     zzzz[nanpos]=aaa[nanpos]
 	     isfixed=fill(true,size(aaa))
-	     isfixed[nanpos]=false
+	     isfixed[nanpos] .= false
 	  
 	    zzzz=myfilter3(zzzz,NaN,isfixed,20)
 	    aaa[nanpos]=zzzz[nanpos]
@@ -234,7 +234,7 @@ n=size(poverrhog)[i]
 			end
         end
     end
-VN[find(.~mask)]=0.0
+VN[find(.~mask)] .= 0.0
 
 if isnan(mean(VN))
  @show mean(VN)

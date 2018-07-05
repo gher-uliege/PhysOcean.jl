@@ -84,7 +84,12 @@ dummy[find(.~mask)]=0.0
 
 
 #Volumeflux=squeeze(sumalongdims(dummy, i),i)/10^6
-Volumeflux=squeeze(sum(dummy, i),i)/10^6
+Volumeflux =
+    if VERSION >= v"0.7.0-beta.0"
+        squeeze(sum(dummy, i),i)/10^6
+    else
+        squeeze(sum(dummy, dims = i),i)/10^6
+    end
 #@show size(Volumeflux)
 #
 # Apply mask based on mask 

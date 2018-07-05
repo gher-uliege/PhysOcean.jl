@@ -7,6 +7,12 @@
 
 
 module PhysOcean
+
+if VERSION >= v"0.7.0-beta.0"
+    using Dates
+else
+    using Compat
+end
 #import divand
 
 # temperature in Kelvin of 0 degree Celsius
@@ -22,8 +28,12 @@ end
 function nansum(x,dim)
     m = isnan.(x)
     x2 = copy(x)
-    x2[m] = 0
-    return sum(x2,dim)
+    x2[m] .= 0
+    @static if VERSION >= v"0.7.0-beta.0"
+        return sum(x2,dims = dim)
+    else
+        return sum(x2,dim)
+    end
 end
 
 function nanmean(x)
@@ -33,8 +43,13 @@ end
 function nanmean(x,dim)
     m = isnan.(x)
     x2 = copy(x)
-    x2[m] = 0
-    return sum(x2,dim) ./ sum(.!m,dim)
+    x2[m] .= 0
+
+    @static if VERSION >= v"0.7.0-beta.0"
+        return sum(x2,dims = dim) ./ sum(.!m,dims = dim)
+    else
+        return sum(x2,dim) ./ sum(.!m,dim)
+    end
 end
 
 
@@ -58,7 +73,6 @@ Convert temperature `T` from ITS-90 scale to the IPTS-68 scale following Saunder
 Saunders, P.M. 1990, The International Temperature Scale of 1990, ITS-90. No.10, p.10.
 https://web.archive.org/web/20170304194831/http://webapp1.dlib.indiana.edu/virtual_disk_library/index.cgi/4955867/FID474/wocedocs/newsltr/news10/news10.pdf
 """
-
 temperature68(T) = 1.00024 * T
 
 """
@@ -110,7 +124,6 @@ Compute the density of sea-water (kg/m³) at the salinity `S` (psu, PSS-78), tem
 Fofonoff, N.P.; Millard, R.C. (1983). Algorithms for computation of fundamental properties of seawater. UNESCO Technical Papers in Marine Science, No. 44. UNESCO: Paris. 53 pp.
 http://web.archive.org/web/20170103000527/http://unesdoc.unesco.org/images/0005/000598/059832eb.pdf
 """
-
 function density(S,T,p)
     ρ = density0(S,T)
 
@@ -133,7 +146,6 @@ Compute the secant bulk modulus of sea-water (bars) at the salinity `S` (psu, PS
 Fofonoff, N.P.; Millard, R.C. (1983). Algorithms for computation of fundamental properties of seawater. UNESCO Technical Papers in Marine Science, No. 44. UNESCO: Paris. 53 pp.
 http://web.archive.org/web/20170103000527/http://unesdoc.unesco.org/images/0005/000598/059832eb.pdf
 """
-
 function secant_bulk_modulus(S,T,p)
     # convert decibars to bars
     p = p/10
@@ -261,7 +273,6 @@ the wind speed `w` (m/s),
 the sea surface temperature `Ts` (degree Celsius),
 the air temperature `Ta` (degree Celsius).
 """
-
 function sensibleflux(Ts,Ta,w)
     Sta = 1.45e-3;
     ca = 1000;
@@ -291,7 +302,6 @@ The temperature must be postive.
 
 Monteith, J.L., and Unsworth, M.H. 2008. Principles of Environmental Physics. Third Ed. AP, Amsterdam. http://store.elsevier.com/Principles-of-Environmental-Physics/John-Monteith/isbn-9780080924793
 """
-
 function vaporpressure(T)
     # Monteith and Unsworth (2008), https://en.wikipedia.org/wiki/Tetens_equation
     e = 6.1078 * exp((17.27 * T)./(T + 237.3));
@@ -315,7 +325,6 @@ end
 
 Filter the vector `x` with a `N`-point Gaussian window.
 """
-
 function gaussfilter(x,N)
     b = gausswin(N);
     c = b/sum(b);
@@ -340,7 +349,6 @@ end
 
 Provides coriolisfrequency et given latidudes in DEGREES from -90 Southpole to +90 Northpole
 """
-
 function coriolisfrequency(latitude)
     
 
@@ -352,7 +360,6 @@ end
 
 Provides gravity in m/s2 at ocean surface at given latidudes in DEGREES from -90 Southpole to +90 Northpole
 """
-
 function earthgravity(latitude)
     
     latrad=pi/180*latitude
