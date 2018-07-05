@@ -1,6 +1,6 @@
 using PhysOcean
 using Base.Test
-
+using StatsBase
 
 @testset "PhysOcean" begin
 

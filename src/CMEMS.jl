@@ -24,7 +24,7 @@ mutable struct IndexFile{T}
 end
 
 function IndexFile(io::IO)
-    index = readdlm(io,','; comment_char = '#')
+    index = readdlm(io,','; comment_char = '#', comments = true)
 
     dateformat = DateFormat("y-m-dTH:M:SZ")
     return IndexFile(index,dateformat)
@@ -102,7 +102,7 @@ end
 Base.length(iter::IndexFileCSV) = size(iter.index,1)
 
 function IndexFileCSV(io::IO,baseurl::AbstractString)
-    index, header = readdlm(io,','; header = true, comment_char = '#')
+    index, header = readdlm(io,','; header = true, comment_char = '#', comments = true)
 
     # PARAM,CATEGORY,CATALOG_ID,FILENAME,DAC,GEO_LAT_MIN,GEO_LAT_MAX,GEO_LONG_MIN,GEO_LONG_MAX,TIME_COVERAGE_START,TIME_COVERAGE_END,PROVIDER,DATE_UPDATE,DATA_MODE,PARAMETERS,PLATFORM,WMO_PLATFORM_CODE,LAST_LATITUDE_OBSERVATION,LAST_LONGITUDE_OBSERVATION,DATE_CREATION_DU,DATE_UPDATE_DU,LAST_DATE_OBSERVATION,MONTHLY_FAMILY,FILE_DELETION,PSAL_GOOD_QC,TEMP_GOOD_QC,INSTITUTION_EDMO_CODE
 
