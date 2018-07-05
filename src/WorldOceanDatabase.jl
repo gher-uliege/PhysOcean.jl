@@ -1,17 +1,17 @@
 module WorldOceanDatabase
 
 using NCDatasets
-import Requests
+import HTTP
 using AbstractTrees
 import Gumbo
 import Glob
+using Missings
 
 """
     extracttar(tarname,dirname)
 
 `tarname` is a tar.gz file to be extract to `dirname`.
 """
-
 function extracttar(tarname,dirname)
     if is_windows()
         const exe7z = joinpath(JULIA_HOME, "7z.exe")
@@ -41,16 +41,25 @@ function extract(tarnames,basedir)
     return dirnames,indexnames
 end
 
+function post(url; data = Dict())
+    r = HTTP.request(
+        "POST",url,
+        [("Content-Type" => "application/x-www-form-urlencoded")],
+        HTTP.escapeuri(data))
+
+    return String(r.body)
+end
+
+
 """
     savereq(r,fname)
 
 Save the body request `r` to the file `fname` for debugging.
 """
-
 function savereq(r,fname)
-    f = open(fname,"w")
-    write(f,readstring(r))
-    close(f)
+    open(fname,"w") do f
+        write(f,r)
+    end
 end
 
 
@@ -64,6 +73,13 @@ bound. The parameters of the functions will
 be transmitted to nodc.noaa.gov (http://www.noaa.gov/privacy.html).
 Note that no XBT corrections are applied.
 The table below show the avialable variable and their units.
+
+
+Example:
+
+dirnames,indexnames = WorldOceanDatabase.download([0,10],[30,40],
+    [DateTime(2000,1,1),DateTime(2000,2,1)],
+    "Temperature","your@email.com,"/tmp")
 
 | Variables								| Unit    |
 |:--------------------------------------|:--------|
@@ -99,7 +115,6 @@ The table below show the avialable variable and their units.
 
 
 """
-
 function download(lonrange,latrange,timerange,varname,email,basedir)
 
     west,east = lonrange[[1,end]]
@@ -167,16 +182,22 @@ function download(lonrange,latrange,timerange,varname,email,basedir)
     #file_name = "ocldb1504104170.6387"
     #probe_name = "OSD,CTD,XBT,MBT,PFL,DRB,MRB,APB,UOR,SUR,GLD"
 
-    r = Requests.post(URL; data = Dict("north" => north, "west" => west, "east" => east, "south" =>  south,
-                              "yearstart" => Dates.year(datestart), "monthstart" => Dates.month(datestart), "daystart" => Dates.day(datestart),
-                              "yearend" => Dates.year(dateend), "monthend" => Dates.month(dateend), "dayend" => Dates.day(dateend),
-                              "variable_all" => "all", "variable_show" => variable,
-                              "go" => "   Get an Inventory    ",
-                              "criteria_number" => "geosearch,datesearch,varisearch"))
+    r = post(URL; data = Dict(
+        "north" => north, "west" => west, "east" => east, "south" =>  south,
+        "yearstart" => Dates.year(datestart),
+        "monthstart" => Dates.month(datestart),
+        "daystart" => Dates.day(datestart),
+        "yearend" => Dates.year(dateend),
+        "monthend" => Dates.month(dateend),
+        "dayend" => Dates.day(dateend),
+        "variable_all" => "all",
+        "variable_show" => variable,
+        "go" => "   Get an Inventory    ",
+        "criteria_number" => "geosearch,datesearch,varisearch"))
     #curl 'https://www.nodc.noaa.gov/cgi-bin/OC5/SELECT/dbsearch.pl' -H 'Host: www.nodc.noaa.gov' -H 'User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:55.0) Gecko/20100101 Firefox/55.0' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Accept-Language: de,en-US;q=0.7,en;q=0.3' --compressed -H 'Content-Type: application/x-www-form-urlencoded' -H 'Referer: https://www.nodc.noaa.gov/cgi-bin/OC5/SELECT/builder.pl' -H 'DNT: 1' -H 'Connection: keep-alive' -H 'Upgrade-Insecure-Requests: 1' --data "north=$north&west=0&east=$east&south=$south&yearstart=$yearstart&monthstart=1&daystart=1&yearend=$yearend&monthend=1&dayend=1&variable_all=all&variable_show=$tem&go=+++Get+an+Inventory++++&criteria_number=geosearch%2Cdatesearch%2Cvarisearch" > out2.html
     savereq(r,"out2.html")
 
-    doc = Gumbo.parsehtml(readstring(r))
+    doc = Gumbo.parsehtml(r)
 
     data = Dict{String,String}("what" => "DOWNLOAD DATA")
 
@@ -214,7 +235,7 @@ function download(lonrange,latrange,timerange,varname,email,basedir)
     #filename=$(grep 'input type="hidden" name="file_name"' out2.html | awk -F\" '{ print $6 }')
 
 
-    r = Requests.post(URLextract; data = data)
+    r = post(URLextract; data = data)
     #curl 'https://www.nodc.noaa.gov/cgi-bin/OC5/SELECT/dbextract.pl' -H 'Host: www.nodc.noaa.gov' -H 'User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:55.0) Gecko/20100101 Firefox/55.0' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Accept-Language: de,en-US;q=0.7,en;q=0.3' --compressed -H 'Content-Type: application/x-www-form-urlencoded' -H 'Referer: https://www.nodc.noaa.gov/cgi-bin/OC5/SELECT/dbsearch.pl' -H 'DNT: 1' -H 'Connection: keep-alive' -H 'Upgrade-Insecure-Requests: 1' --data "what=DOWNLOAD+DATA&file_name=$filename&probe_name=OSD%2CCTD%2CXBT%2CMBT%2CPFL%2CDRB%2CMRB%2CAPB%2CUOR%2CSUR%2CGLD&query_results=%3A$yearstart%3A$yearend%3A1%3A1%3A1%3A1%3A$west%3A$east%3A$north%3A$south%3AOSD%2CCTD%2CXBT%2CMBT%2CPFL%2CDRB%2CMRB%2CAPB%2CUOR%2CSUR%2CGLD%3A%3A%3A$tem%3A%3A%3A%3A%3A%3A%3A%3A%3A%3A" > out3.html
     savereq(r,"out3.html")
 
@@ -223,7 +244,16 @@ function download(lonrange,latrange,timerange,varname,email,basedir)
     # here 15: Chen 2014
 
 
-    r = Requests.post(URLextract; data = Dict("format" => "net", "probe_storage" => "none", "csv_choice" => "csv", "level" => "observed", "xbt_corr" => xbt_correction, "email" => email, "what" => "EXTRACT DATA", "file_name" => file_name, "probe_name" => probe_name))
+    r = post(URLextract; data = Dict(
+        "format" => "net",
+        "probe_storage" => "none",
+        "csv_choice" => "csv",
+        "level" => "observed",
+        "xbt_corr" => xbt_correction,
+        "email" => email,
+        "what" => "EXTRACT DATA",
+        "file_name" => file_name,
+        "probe_name" => probe_name))
     savereq(r,"out4.html")
 
     #curl 'https://www.nodc.noaa.gov/cgi-bin/OC5/SELECT/dbextract.pl' -H 'Host: www.nodc.noaa.gov' -H 'User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:55.0) Gecko/20100101 Firefox/55.0' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Accept-Language: de,en-US;q=0.7,en;q=0.3' --compressed -H 'Content-Type: application/x-www-form-urlencoded' -H 'Referer: https://www.nodc.noaa.gov/cgi-bin/OC5/SELECT/dbextract.pl' -H 'DNT: 1' -H 'Connection: keep-alive' -H 'Upgrade-Insecure-Requests: 1' --data "format=net&probe_storage=none&csv_choice=csv&level=observed&xbt_corr=15&email=barth.alexander%40gmail.com&what=EXTRACT+DATA&file_name=$filename&probe_name=OSD%2CCTD%2CXBT%2CMBT%2CPFL%2CDRB%2CMRB%2CAPB%2CUOR%2CSUR%2CGLD" > out4.html
@@ -241,7 +271,7 @@ function download(lonrange,latrange,timerange,varname,email,basedir)
                 dataurl = "$(URLselect)/$(file_name).$(probe).tar.gz"
 
                 # check if dataurl exists already
-                if Requests.head(dataurl).status == 200
+                if HTTP.head(dataurl, status_exception = false).status == 200
                     println("$(probe) is now available")
                     push!(probes_available,probe)
 
@@ -298,7 +328,6 @@ Load all profiles with the NetCDF variable `varname` in `dirname` indexed with
 the NetCDF file `indexname`.
 T is the type (e.g. Float64) for numeric return values.
 """
-
 function load(T,dirname::AbstractString,indexname,varname)
     profiles = T[]
     zs = T[]

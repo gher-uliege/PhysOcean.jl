@@ -1,7 +1,6 @@
 module CMEMS
 
 using NCDatasets
-using DataArrays
 
 const no_qc_performed = 0
 const good_data = 1

@@ -9,7 +9,7 @@ using Base.Test
 
     @test nansum([NaN 1.; 2. 4.],1) ≈ [2. 5.]
     @test nanmean([NaN 1.; 2. 4.],1) ≈ [2. 2.5]
-    
+
     @test datetime_matlab(730486) == DateTime(2000,1,1)
 
     @test freezing_temperature(35) ≈ -1.9 atol=0.1
@@ -56,11 +56,11 @@ using Base.Test
     filename = joinpath(dirname(@__FILE__),"20160622_0747_TC100.csv")
     data,header,metadata = loadcastaway(filename)
     @test data[1,end] ≈ 1026.4925224486576
-	
-	
+
+
 	@test earthgravity.([90 0]) ≈ [9.8321862058848 9.780327]
 	@test coriolisfrequency.([90 0]) ≈ [0.0001458423 0]
-	
+
 	mask=trues(3,4,5)
     myval=zeros(3,4,5)
     botval=zeros(3,4)
@@ -92,7 +92,7 @@ using Base.Test
 		end
 	end
     @test var(addlowtoheighdimension(eta,myval)-myvals)==0
-	
+
 	mask=trues(3,4,5)
 	myval=zeros(3,4,5)
 	myvali=zeros(3,4,5)
@@ -101,7 +101,7 @@ using Base.Test
 	myvals=zeros(3,4,5)
 	for i=1:3
     for j=1:4
-        
+
         for k=1:5
             myval[i,j,k]=i+j
             myvali[i,j,k]=(i+j)*k
@@ -110,7 +110,7 @@ using Base.Test
     end
 	end
 	@test var(integraterhoprime(myval,zval)-myvali)==0
-	
+
 	mask=trues(3,4,5)
 	myval=zeros(3,4,5)
 
@@ -119,18 +119,18 @@ using Base.Test
 	myvals=zeros(3,4,5)
 	for i=1:3
     for j=1:4
-        
+
         for k=1:5
             myval[i,j,k]=i+j+k
-            
+
             zval[i,j,k]=k
         end
     end
 	end
 
 	@test var(stericheight(myval,zval,3)*1025.0+myval[:,:,3])==0
-	
-	
+
+
 	myval=zeros(3,4,5)
 	myvals=zeros(3,4,5)
 	for i=1:3
@@ -144,9 +144,9 @@ using Base.Test
 	floodfill!(myval,myvals,NaN)
 	refval=[6.826086956521739 8.0; 8.0 9.173913043478262]
 	@test myval[2,2:3,3:4] ≈ refval
-	
-	
-	
+
+
+
 	xi=zeros(3,4,5)
 	yi=zeros(3,4,5)
 	zi=zeros(3,4,5)
@@ -168,18 +168,18 @@ using Base.Test
         end
     end
 	end
-	temp=16-zi/1600+cos.(1.4*xi+0*xi-zi/300)+xi/5.*xi./(zi+1)/2000.*(zi/1000+xi)
+	temp=16-zi/1600+cos.(1.4*xi+0*xi-zi/300)+xi/5 .* xi./(zi+1)/2000 .* (zi/1000+xi)
 	salt=28+xi
 	dens=density.(salt,temp,0)-1025;
 	velocities,eta,Vflux=geostrophy(mask,dens,(pm,pn,po),(xi,yi,zi);znomotion=3);
 	@test var(eta) ≈ 0.00045683197717526355
 	velocities,eta,Vflux=geostrophy(mask,dens,(pm,pn,po),(xi,yi,zi);ssh=eta);
 	@test var(eta) ≈ 0.00045683197717526355
-	
+
 	psi=streamfunctionvolumeflux(mask,velocities,(pm,pn,po),(xi,yi,zi))
-	
+
 	@test mean(psi[1]) ≈ -0.06242550029999892
-	
+
 	mask[2,3,:]=false
 	eta1=eta[1,1]
 	psi11=psi[1][1,1]
@@ -187,12 +187,12 @@ using Base.Test
 	@test eta1 ≈ eta[1,1]
 	velocities,eta,Vflux=geostrophy(mask,dens,(pm,pn,po),(xi,yi,zi);ssh=eta);
 	@test eta1 ≈ eta[1,1]
-	
+
 	psi=streamfunctionvolumeflux(mask,velocities,(pm,pn,po),(xi,yi,zi))
-	
+
 	@test psi11 ≈ psi[1][1,1]
-	
-	
+
+
 
     include("test_cmems.jl")
 end
