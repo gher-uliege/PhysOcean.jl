@@ -63,7 +63,7 @@ function myfilter3(A::AbstractArray,fillvalue,isfixed,ntimes=1)
         B=A
     end
 
-    R = CartesianRange(size(A))
+    R = CartesianIndices(size(A))
     I1, Iend = first(R), last(R)
     for nn=1:ntimes
 
@@ -72,7 +72,7 @@ function myfilter3(A::AbstractArray,fillvalue,isfixed,ntimes=1)
             # Define out[I] fillvalue
             out[I] = fillvalue
             if dvisvalue(B[I])
-                for J in CartesianRange(max(I1, I-I1), min(Iend, I+I1))
+                for J in CartesianIndices(max(I1, I-I1), min(Iend, I+I1))
                     # If not a fill value
                     #                if !(B[J] == fillvalue)
                     if dvisvalue(B[J])
@@ -221,8 +221,8 @@ VN=zeros(Float64,size(poverrhog))
 
 #@show mean(VN),mean(poverrhog),typeof(poverrhog),typeof(VN)
 
-Rpre = CartesianRange(size(poverrhog)[1:i-1])
-Rpost = CartesianRange(size(poverrhog)[i+1:end])
+Rpre = CartesianIndices(size(poverrhog)[1:i-1])
+Rpost = CartesianIndices(size(poverrhog)[i+1:end])
 n=size(poverrhog)[i]
 
     for Ipost in Rpost

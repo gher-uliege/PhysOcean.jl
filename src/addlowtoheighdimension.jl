@@ -14,8 +14,8 @@ end
 nhd=similar(hd)
 
 
-Rpre = CartesianRange(size(hd)[1:dim-1])
-Rpost = CartesianRange(size(hd)[dim+1:end])
+Rpre = CartesianIndices(size(hd)[1:dim-1])
+Rpost = CartesianIndices(size(hd)[dim+1:end])
 n=size(hd)[dim]
 
     for Ipost in Rpost

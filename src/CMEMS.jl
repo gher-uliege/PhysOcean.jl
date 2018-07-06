@@ -3,6 +3,7 @@ module CMEMS
 using NCDatasets
 if VERSION >= v"0.7.0-beta.0"
     using Dates
+    using DelimitedFiles
 else
     using Compat
 end
@@ -280,7 +281,7 @@ function load(T,fname::TS,param; qualityflags = [good_data, probably_good_data])
 
     if ndims(lon) == 1
         @assert size(lon,1) == size(data,2)
-        lon = repmat(reshape(lon,1,size(lon,1)),size(data,1),1)
+        lon = repeat(reshape(lon,1,size(lon,1)),inner = (size(data,1),1))
     end
 
     lat = loadvar(ds,"LATITUDE";

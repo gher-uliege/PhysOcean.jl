@@ -2,7 +2,6 @@
 # from http://julialang.org/blog/2016/02/iteration
 # to  fill values in a regular grid array. 
 
-
 function floodfill!(A::AbstractArray,B::AbstractArray,fillvalue;MAXITER=())
 
     #
@@ -26,7 +25,7 @@ function floodfill!(A::AbstractArray,B::AbstractArray,fillvalue;MAXITER=())
     cw=1
     iter=0
 
-    R = CartesianRange(size(A))
+    R = CartesianIndices(size(A))
     I1, Iend = first(R), last(R)
 	needtocontinue=true
     while needtocontinue
@@ -37,8 +36,7 @@ function floodfill!(A::AbstractArray,B::AbstractArray,fillvalue;MAXITER=())
             
             B[I] = A[I]
             if !dvisvalue(A[I])
-                for J in CartesianRange(max(I1, I-I1), min(Iend, I+I1))
-                    
+                for J in CartesianIndices(max(I1, I-I1), min(Iend, I+I1))
                     if dvisvalue(A[J])
                         s += A[J]
                         if (I==J)

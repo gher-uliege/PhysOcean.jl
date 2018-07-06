@@ -1,4 +1,8 @@
-using Base.Test
+if VERSION >= v"0.7.0-beta.0"
+    using Test
+else
+    using Base.Test
+end
 
 # mock implementation for testing downloading
 function mockdownload(URL,localname = tempname())
@@ -44,10 +48,10 @@ files = CMEMS.download(lonr,latr,timerange,param,username,password,basedir;
                        download = mockdownload)
 
 @test length(files) == 1
-@test contains(files[1],"file1")
-@test !contains(files[1],"file2")
+@test occursin("file1",files[1])
+@test !occursin("file2",files[1])
 
-@test contains(String(logstream),"hostname")
+@test occursin("hostname",String(take!(logstream)))
 
 # check loading CMEMS data
 

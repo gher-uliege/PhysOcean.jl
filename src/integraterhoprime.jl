@@ -27,8 +27,8 @@ dim=ndims(rhop)
 end
 
 rhoi=similar(rhop)
-Rpre = CartesianRange(size(rhop)[1:dim-1])
-Rpost = CartesianRange(size(rhop)[dim+1:end])
+Rpre = CartesianIndices(size(rhop)[1:dim-1])
+Rpost = CartesianIndices(size(rhop)[dim+1:end])
     
 _integraterhoprime!(rhoi, rhop, z, Rpre, size(rhop, dim), Rpost)
 end

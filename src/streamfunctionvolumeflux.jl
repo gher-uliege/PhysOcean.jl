@@ -42,7 +42,7 @@ end
     # # It's assumed that B has size 1 along any dimension that we're summing
     # fill!(B, 0)
     # Bmax = CartesianIndex(size(B))
-    # for I in CartesianRange(size(A))
+    # for I in CartesianIndices(size(A))
         # B[min(Bmax,I)] += A[I]
     # end
     # B

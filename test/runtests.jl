@@ -1,5 +1,7 @@
+# -*- compile-command: "~/opt/julia-d5531c3995/bin/julia -e 'include("runtests.jl")'" -*-
+
+
 using PhysOcean
-using StatsBase
 
 if VERSION >= v"0.7.0-beta.0"
     using Dates
@@ -145,7 +147,7 @@ end
 			end
 		end
 	end
-	myval[2,2:3,3:4]=NaN
+	myval[2,2:3,3:4] .= NaN
 	floodfill!(myval,myvals,NaN)
 	refval=[6.826086956521739 8.0; 8.0 9.173913043478262]
 	@test myval[2,2:3,3:4] ≈ refval
@@ -173,9 +175,9 @@ end
             end
         end
 	end
-	temp=16-zi/1600+cos.(1.4*xi+0*xi-zi/300)+xi/5 .* xi./(zi+1)/2000 .* (zi/1000+xi)
-	salt=28+xi
-	dens=density.(salt,temp,0)-1025;
+	temp=16 .- zi/1600+cos.(1.4*xi+0*xi-zi/300)+xi/5 .* xi./(zi .+ 1)/2000 .* (zi/1000+xi)
+	salt=28 .+ xi
+	dens=density.(salt,temp,0) .- 1025;
 	velocities,eta,Vflux=geostrophy(mask,dens,(pm,pn,po),(xi,yi,zi);znomotion=3);
 	@test var(eta) ≈ 0.00045683197717526355
 	velocities,eta,Vflux=geostrophy(mask,dens,(pm,pn,po),(xi,yi,zi);ssh=eta);
@@ -185,7 +187,7 @@ end
 
 	@test mean(psi[1]) ≈ -0.06242550029999892
 
-	mask[2,3,:]=false
+	mask[2,3,:] .= false
 	eta1=eta[1,1]
 	psi11=psi[1][1,1]
 	velocities,eta,Vflux=geostrophy(mask,dens,(pm,pn,po),(xi,yi,zi);znomotion=3);

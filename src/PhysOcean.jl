@@ -12,6 +12,8 @@ if VERSION >= v"0.7.0-beta.0"
     using Dates
 else
     using Compat
+    using Compat: CartesianIndices
+    CartesianIndices(i,j) = CartesianRange(i,j)
 end
 #import divand
 
