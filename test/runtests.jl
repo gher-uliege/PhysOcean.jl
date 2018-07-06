@@ -118,14 +118,12 @@ using StatsBase
 	eta=zeros(3,4)
 	myvals=zeros(3,4,5)
 	for i=1:3
-    for j=1:4
-
-        for k=1:5
-            myval[i,j,k]=i+j+k
-
-            zval[i,j,k]=k
+        for j=1:4
+            for k=1:5
+                myval[i,j,k]=i+j+k
+                zval[i,j,k]=k
+            end
         end
-    end
 	end
 
 	@test var(stericheight(myval,zval,3)*1025.0+myval[:,:,3])==0
@@ -157,16 +155,16 @@ using StatsBase
 	mask=trues(3,4,5)
 
 	for i=1:3
-    for j=1:4
-        for k=1:5
-            xi[i,j,k]=i
-            yi[i,j,k]=30+j
-            zi[i,j,k]=10*k
-            pm[i,j,k]=1
-            pn[i,j,k]=1
-            po[i,j,k]=0.1
+        for j=1:4
+            for k=1:5
+                xi[i,j,k]=i
+                yi[i,j,k]=30+j
+                zi[i,j,k]=10*k
+                pm[i,j,k]=1
+                pn[i,j,k]=1
+                po[i,j,k]=0.1
+            end
         end
-    end
 	end
 	temp=16-zi/1600+cos.(1.4*xi+0*xi-zi/300)+xi/5 .* xi./(zi+1)/2000 .* (zi/1000+xi)
 	salt=28+xi
