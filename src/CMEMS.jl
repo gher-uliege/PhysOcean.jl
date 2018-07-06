@@ -290,7 +290,7 @@ function load(T,fname::TS,param; qualityflags = [good_data, probably_good_data])
                   qualityflags = qualityflags)
     if ndims(lat) == 1
         @assert size(lat,1) == size(data,2)
-        lat = repmat(reshape(lat,1,size(lat,1)),size(data,1),1)
+        lat = repeat(reshape(lat,1,size(lat,1)), inner = (size(data,1),1))
     end
 
     z =
@@ -311,7 +311,7 @@ function load(T,fname::TS,param; qualityflags = [good_data, probably_good_data])
     #@show time
     if ndims(time) == 1
         @assert size(time,1) == size(data,2)
-        time = repmat(reshape(time,1,size(time,1)),size(data,1),1)
+        time = repeat(reshape(time,1,size(time,1)), inner = (size(data,1),1))
     end
 
     ids = fill(ds.attrib["id"],size(data))
