@@ -1,6 +1,13 @@
 using PhysOcean
-using Base.Test
 using StatsBase
+
+if VERSION >= v"0.7.0-beta.0"
+    using Dates
+    using Test
+    using Statistics
+else
+    using Base.Test    
+end
 
 @testset "PhysOcean" begin
 

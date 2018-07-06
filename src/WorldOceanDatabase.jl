@@ -6,6 +6,9 @@ using AbstractTrees
 import Gumbo
 import Glob
 using Missings
+if VERSION >= v"0.7.0-beta.0"
+    using Printf
+end
 
 """
     extracttar(tarname,dirname)

@@ -27,8 +27,8 @@ ind1 = [(j == dim ? (1) : (:)) for j = 1:ndims(f)]
 fdeep=similar(f[ind1...])
 
 
-Rpre = CartesianRange(size(f)[1:dim-1])
-Rpost = CartesianRange(size(f)[dim+1:end])
+Rpre = CartesianIndices(size(f)[1:dim-1])
+Rpost = CartesianIndices(size(f)[dim+1:end])
 n=size(f)[dim]
 
     for Ipost in Rpost
