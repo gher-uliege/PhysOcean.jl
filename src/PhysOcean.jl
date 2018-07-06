@@ -288,7 +288,6 @@ end
 
 Compute the solar heat flux (W/m²)
 """
-
 function solarflux(Q,al)
     Qs = Q*(1-al)
     return Qs

@@ -17,7 +17,6 @@
 Compute steric height with respect to given depth level presently provided as index , not depth
 
 """
-
 function stericheight(rhoi,z,zlevel,dim::Integer=0);
 
 

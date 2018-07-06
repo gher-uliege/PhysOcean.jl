@@ -1,13 +1,7 @@
 """
-
-
-newhd = addlowtoheighdimension(ld,hd,dim=0);
-
-
-
+    newhd = addlowtoheighdimension(ld,hd,dim=0);
 
 """
-
 function addlowtoheighdimension(ld,hd,dim::Integer=0)
 
 if dim==0

@@ -32,7 +32,6 @@ Dimensions of ssh must be the same as rhop in which vertical dimension has been 
 If you force fillin=false, then you must have created the density array without missing values outside of this call, as well as ssh if you provide it.
 
 """
-
 function geostrophy(mask::BitArray,rhop,pmnin,xiin;dim::Integer=0,ssh=(),znomotion=0,fillin=true)
 
 if dim==0
@@ -112,7 +111,7 @@ rhof=deepcopy(rhop)
 # If not asked for the field must have already been filled in by other means
 if fillin
 	BBB=deepcopy(rhop)
-	rhof[find(.~mask)] .= NaN
+	rhof[.!mask] .= NaN
 	#maybe better to floodfill in all directions EXCEPT vertically. So loop on layers and indexing ?
 	#floodfill!(rhof,B,NaN)
 	for iz=1:size(BBB)[dim]
@@ -168,7 +167,7 @@ rhoi=integraterhoprime(rhof,xiin[dim],dim)
 		if fillin
 		 ind2 = [(j == dim ? (1) : (:)) for j = 1:ndims(mask)]
 		 # @show ind2
-		  ssh[find(.~mask[ind2...])] .= NaN
+		  ssh[.!mask[ind2...]] .= NaN
 		 # @show ssh
 		 aaa=deepcopy(ssh)
 		 bbb=deepcopy(ssh)
@@ -234,7 +233,7 @@ n=size(poverrhog)[i]
 			end
         end
     end
-VN[find(.~mask)] .= 0.0
+VN[.!mask] .= 0.0
 
 if isnan(mean(VN))
  @show mean(VN)
@@ -265,7 +264,12 @@ dummy=integraterhoprime(VN./pmnin[i],xiin[dim],dim)
 
 
 
-fluxi=squeeze(sum(dummy[ind1...],i),i)
+fluxi =
+    if VERSION >= v"0.7.0-beta.0"
+        squeeze(sum(dummy[ind1...],dims = i),dims = i)
+    else
+        squeeze(sum(dummy[ind1...],i),i)
+    end
 
 #@show size(fluxi), var(fluxi),mean(VN),var(VN)
 

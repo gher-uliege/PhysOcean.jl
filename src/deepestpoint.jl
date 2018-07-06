@@ -15,7 +15,6 @@ fdeep = deepestpoint(mask,f,dim=0);
 
 
 """
-
 function deepestpoint(mask,f,dim::Integer=0)
 
 if dim==0

@@ -22,7 +22,6 @@
 Calculates volume flux streamfunction calculated from the surface. The value of this field provides the total flow (in Sverdrup) across the section above the depth of the zlevel looked at. 
 
 """
-
 function streamfunctionvolumeflux(mask::BitArray,velocities,pmnin,xiin;dim::Integer=0)
 
 if dim==0
@@ -67,7 +66,7 @@ for i=1:dim-1
 
 VN=velocities[i]
 
-VN[find(.~mask)]=0.0
+VN[findall(.!mask)] .= 0.0
 
 # Now transports
 
@@ -78,7 +77,7 @@ dummy=integraterhoprime(VN./pmnin[i],xiin[dim],dim)
 #@show dummy[:,:,1]
 
 # Put zero on land
-dummy[find(.~mask)]=0.0
+dummy[.!mask] .= 0.0
 
 # And now simply do the reduction
 
@@ -86,7 +85,7 @@ dummy[find(.~mask)]=0.0
 #Volumeflux=squeeze(sumalongdims(dummy, i),i)/10^6
 Volumeflux =
     if VERSION >= v"0.7.0-beta.0"
-        squeeze(sum(dummy, dims = i),i)/10^6
+        squeeze(sum(dummy, dims = i),dims = i)/10^6
     else
         squeeze(sum(dummy, i),i)/10^6
     end
@@ -94,8 +93,11 @@ Volumeflux =
 #
 # Apply mask based on mask 
 
-Volumeflux[find(sum(mask,i).==0)]=NaN
-
+if VERSION >= v"0.7.0-beta.0"
+    Volumeflux[squeeze(sum(mask,dims=i),dims=i) .== 0] .= NaN
+else
+    Volumeflux[find(sum(mask,i) .== 0)] .= NaN
+end
 #
 
 psifluxes=tuple(psifluxes...,(deepcopy(Volumeflux)))

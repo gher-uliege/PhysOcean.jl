@@ -1,7 +1,11 @@
 module CMEMS
 
 using NCDatasets
-
+if VERSION >= v"0.7.0-beta.0"
+    using Dates
+else
+    using Compat
+end
 const no_qc_performed = 0
 const good_data = 1
 const probably_good_data = 2
@@ -32,7 +36,7 @@ end
 
 function parsetime(str,dateformat)
     #MYO-BLACKSEA-01,ftp://vftpmo.io-bas.bg/Core/INSITU_BS_TS_REP_OBSERVATIONS_013_042/history/mooring/BS_TS_MO_CG.nc,43.8022,43.8022,28.6025,28.6025,2016-01-01T00:15:00Z,2016-12-31T23:45:00ZZ,Institutul National de Cercetare-Dezvoltare pentru Geologie si Geoecologie Marina (GeoEcoMar) Romania,2017-03-03T09:23:50Z,R,DEPH TEMP CNDC FLU2 DOX1 ATMS DRYT WSPD WDIR GSPD HCSP HCDT
-    if contains(str,"ZZ")
+    if occursin("ZZ",str)
         return DateTime(replace(str,"ZZ","Z"),dateformat)
     else
         return DateTime(str,dateformat)
@@ -65,7 +69,7 @@ function Base.next(iter::IndexFile,i)
     parameter           = iter.index[i,12] :: SubString{String}
 
 
-    localname = replace(url,r"^.*://","")
+    localname = replace(url,r"^.*://" => "")
 
     #@show i,url
 
@@ -84,15 +88,15 @@ Base.done(iter::IndexFile,i) = i == size(iter.index,1)
 
 function downloadpw(URL,username,password,log,mydownload,localname = tempname())
         print(log,"Downloading ");
-        print_with_color(:green,log,URL)
+        printstyled(log,URL; color = :green)
         print(log,"\n")
 
         if startswith(URL,"ftp")
-            mydownload(replace(URL,r"^ftp://","ftp://$(username):$(password)@"),localname)
+            mydownload(replace(URL,r"^ftp://" => "ftp://$(username):$(password)@"),localname)
         elseif startswith(URL,"https")
-            mydownload(replace(URL,r"^https://","https://$(username):$(password)@"),localname)
+            mydownload(replace(URL,r"^https://" => "https://$(username):$(password)@"),localname)
         else
-            mydownload(replace(URL,r"^http://","http://$(username):$(password)@"),localname)
+            mydownload(replace(URL,r"^http://" => "http://$(username):$(password)@"),localname)
         end
 
         return localname
@@ -135,8 +139,6 @@ julia> files = CMEMS.download(lonr,latr,timerange,param,username,password,basedi
 
 
 """
-
-
 function download(lonr,latr,timerange,param,username,password,basedir;
                   indexURLs = [
                        # Baltic
@@ -246,7 +248,7 @@ function loadvar(ds,param;
             keep_data[:] =  keep_data .| (qf .== flag)
         end
 
-        data[(.!keep_data)] = fillvalue
+        data[.!keep_data] .= fillvalue
     end
 
     return data
@@ -328,7 +330,6 @@ depth, time (as `DateTime`) and an identifier (as `String`).
 
 See also `CMEMS.download`.
 """
-
 function load(T,fnames::Vector{TS},param;
               qualityflags = [good_data, probably_good_data]) where TS <: AbstractString
     data = T[]
