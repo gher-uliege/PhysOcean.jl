@@ -155,7 +155,7 @@ function download(lonr,latr,timerange,param,username,password,basedir;
                        # Black Sea
                        "ftp://vftpmo.io-bas.bg/Core/INSITU_BS_TS_REP_OBSERVATIONS_013_042/index_history.txt"
                    ],
-                  log = STDOUT,
+                  log = stdout,
                   download = Base.download,
                   kwargs...)
 
@@ -174,7 +174,7 @@ function download(lonr,latr,timerange,param,username,password,basedir;
 end
 
 function download!(index,lonr,latr,timerange,param,username,password,basedir,files;
-                  log = STDOUT,
+                  log = stdout,
                   download = Base.download,
                   skipifpresent = true
                    )

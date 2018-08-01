@@ -10,11 +10,17 @@ module PhysOcean
 
 if VERSION >= v"0.7.0-beta.0"
     using Dates
+    using Statistics
 else
     using Compat
     using Compat: CartesianIndices
     CartesianIndices(i,j) = CartesianRange(i,j)
 end
+
+if v"0.7.0-beta2" <= VERSION < v"0.7.0-beta2.188"
+    const dropdims = squeeze
+end
+
 #import divand
 
 # temperature in Kelvin of 0 degree Celsius

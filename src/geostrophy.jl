@@ -265,8 +265,8 @@ dummy=integraterhoprime(VN./pmnin[i],xiin[dim],dim)
 
 
 fluxi =
-    if VERSION >= v"0.7.0-beta.0"
-        squeeze(sum(dummy[ind1...],dims = i),dims = i)
+    if VERSION >= v"0.7.0-beta2"
+        dropdims(sum(dummy[ind1...],dims = i),dims = i)
     else
         squeeze(sum(dummy[ind1...],i),i)
     end

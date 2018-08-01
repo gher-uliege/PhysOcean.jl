@@ -84,8 +84,8 @@ dummy[.!mask] .= 0.0
 
 #Volumeflux=squeeze(sumalongdims(dummy, i),i)/10^6
 Volumeflux =
-    if VERSION >= v"0.7.0-beta.0"
-        squeeze(sum(dummy, dims = i),dims = i)/10^6
+    if VERSION >= v"0.7.0-beta2"
+        dropdims(sum(dummy, dims = i),dims = i)/10^6
     else
         squeeze(sum(dummy, i),i)/10^6
     end
@@ -93,8 +93,8 @@ Volumeflux =
 #
 # Apply mask based on mask 
 
-if VERSION >= v"0.7.0-beta.0"
-    Volumeflux[squeeze(sum(mask,dims=i),dims=i) .== 0] .= NaN
+if VERSION >= v"0.7.0-beta2"
+    Volumeflux[dropdims(sum(mask,dims=i),dims=i) .== 0] .= NaN
 else
     Volumeflux[find(sum(mask,i) .== 0)] .= NaN
 end
