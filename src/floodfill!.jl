@@ -1,6 +1,6 @@
 # Adapted from
 # from http://julialang.org/blog/2016/02/iteration
-# to  fill values in a regular grid array. 
+# to  fill values in a regular grid array.
 
 function floodfill!(A::AbstractArray,B::AbstractArray,fillvalue;MAXITER=())
 
@@ -16,8 +16,8 @@ function floodfill!(A::AbstractArray,B::AbstractArray,fillvalue;MAXITER=())
 	  MAXITER=sum(size(B))
 	  #@show MAXITER
 	end
-	
-	
+
+
     ntimes=1
     nd=ndims(A)
     # central weight
@@ -25,18 +25,31 @@ function floodfill!(A::AbstractArray,B::AbstractArray,fillvalue;MAXITER=())
     cw=1
     iter=0
 
-    R = CartesianIndices(size(A))
-    I1, Iend = first(R), last(R)
+    RI = Compat.CartesianIndices(size(A))
+    I1, Iend = first(RI), last(RI)
 	needtocontinue=true
     while needtocontinue
 	    iter=iter+1
         needtocontinue=false
-        for I in R
+        for I in RI
             w, s = 0.0, zero(eltype(A))
-            
+
             B[I] = A[I]
             if !dvisvalue(A[I])
-                for J in CartesianIndices(max(I1, I-I1), min(Iend, I+I1))
+                RJ =
+                    @static if VERSION >= v"0.7.0"
+                        # https://github.com/JuliaLang/julia/issues/15276#issuecomment-297596373
+                        # let block work-around
+                        let I = I, I1 = I1, Iend = Iend
+                            CartesianIndices(ntuple(
+                                i-> max(I1[i], I[i]-I1[i]):min(Iend[i], I[i]+I1[i]),nd))
+                        end
+                    else
+                        CartesianIndices(max(I1, I-I1), min(Iend, I+I1))
+                    end
+
+
+                for J in RJ
                     if dvisvalue(A[J])
                         s += A[J]
                         if (I==J)
@@ -54,12 +67,12 @@ function floodfill!(A::AbstractArray,B::AbstractArray,fillvalue;MAXITER=())
                 end
             end
         end
-        
+
 	if iter > MAXITER
 	needtocontinue=false
-    end	
+    end
 	A[:]=B[:]
-		
+
     end
 
 

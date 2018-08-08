@@ -1,20 +1,20 @@
 """
 
     velocity,ssh,fluxes=geostrophy(mask::BitArray,rhop,pmnin,xiin;dim::Integer=0,ssh=(),znomotion=0,fillin=true)
-	
-	
+
+
 
 
 
 # Input:
-* `mask` : Boolean array with true in water and false on land. 
-* `rhop` : density anomaly (rho-1025) array on the same grid as the mask. 
+* `mask` : Boolean array with true in water and false on land.
+* `rhop` : density anomaly (rho-1025) array on the same grid as the mask.
 * `pmnin`: tuple of metrics as in divand, but to get velocities in m/s the metrics need to be in per meters too.
 * `xiin`: tuple position of the grid points.
 * `dim` : optional paramter telling which index in the arrays corresponds to the vertical direction. By default 0 uses the last index
 * `ssh` : array as mask for which the vertical direction is taken out. Corresponds to sea surface height in meters. Default is no used but diagnosed
 * `znomotion` : index in the vertical direction where a level of no motion is assumed
-* `fillin` : Boolean telling if a filling of land points using water points at the same level is to be used. Default is yes. 
+* `fillin` : Boolean telling if a filling of land points using water points at the same level is to be used. Default is yes.
 
 
 
@@ -63,16 +63,28 @@ function myfilter3(A::AbstractArray,fillvalue,isfixed,ntimes=1)
         B=A
     end
 
-    R = CartesianIndices(size(A))
-    I1, Iend = first(R), last(R)
+    RI = Compat.CartesianIndices(size(A))
+    I1, Iend = first(RI), last(RI)
     for nn=1:ntimes
 
-        for I in R
+        for I in RI
             w, s = 0.0, zero(eltype(out))
             # Define out[I] fillvalue
             out[I] = fillvalue
             if dvisvalue(B[I])
-                for J in CartesianIndices(max(I1, I-I1), min(Iend, I+I1))
+                RJ =
+                    @static if VERSION >= v"0.7.0"
+                        # https://github.com/JuliaLang/julia/issues/15276#issuecomment-297596373
+                        # let block work-around
+                        let I = I, I1 = I1, Iend = Iend
+                            CartesianIndices(ntuple(
+                                i-> max(I1[i], I[i]-I1[i]):min(Iend[i], I[i]+I1[i]),nd))
+                        end
+                    else
+                        CartesianIndices(max(I1, I-I1), min(Iend, I+I1))
+                    end
+
+                for J in RJ
                     # If not a fill value
                     #                if !(B[J] == fillvalue)
                     if dvisvalue(B[J])
@@ -88,7 +100,7 @@ function myfilter3(A::AbstractArray,fillvalue,isfixed,ntimes=1)
 				if isfixed[I]
 				    out[I]=A[I]
 				  else
-				    if w>0.0 
+				    if w>0.0
                     out[I] = s/w
                     end
 				end
@@ -128,24 +140,24 @@ if fillin
 	  # @show size(aaa),size(bbb)
 	 #  Now one also should filter in the places where originially NaN where found
 	  # si using divand_filter3(,NaN,10)
-	  
+
 	  zzzz=fill(NaN,size(aaa))
 	  #@show size(zzzz)
 	  zzzz[nanpos]=aaa[nanpos]
 	  isfixed=fill(true,size(aaa))
 	  isfixed[nanpos] .= false
-	  
+
 	  zzzz=myfilter3(zzzz,NaN,isfixed,20)
 	  aaa[nanpos]=zzzz[nanpos]
 	  #@show size(aaa),size(zzzz)
      #@show size(rhof)
 	 rhof[ind2...]=deepcopy(aaa)
-	  
-	  
-	  
-	  
+
+
+
+
 	end
-	
+
 end
 
 
@@ -171,36 +183,36 @@ rhoi=integraterhoprime(rhof,xiin[dim],dim)
 		 # @show ssh
 		 aaa=deepcopy(ssh)
 		 bbb=deepcopy(ssh)
-	  
+
 	     nanpos=isnan.(aaa)
-	    
+
 	     aaa=floodfill!(aaa,bbb,NaN)
 		 zzzz=fill(NaN,size(aaa))
 	    #@show size(zzzz)
 	     zzzz[nanpos]=aaa[nanpos]
 	     isfixed=fill(true,size(aaa))
 	     isfixed[nanpos] .= false
-	  
+
 	    zzzz=myfilter3(zzzz,NaN,isfixed,20)
 	    aaa[nanpos]=zzzz[nanpos]
 		ssh=deepcopy(aaa)
-		 
+
 		end
   end
 
-# Now add barotropic pressure onto the direction dim 
+# Now add barotropic pressure onto the direction dim
 
 poverrho=similar(rhoi)
 
 #@show var(rhoi),mean(rhoi)
 
-# 
+#
 poverrhog=addlowtoheighdimension(ssh,rhoi/1025.,dim)
 
 #@show mean(var(poverrhog,2))
 
 goverf=earthgravity.(xiin[2])./coriolisfrequency.(xiin[2])
- 
+
 # Need to decide how to provide latitude if 1D ...
 
 
@@ -226,7 +238,7 @@ Rpost = CartesianIndices(size(poverrhog)[i+1:end])
 n=size(poverrhog)[i]
 
     for Ipost in Rpost
-        
+
         for j = 1:n-1
             for Ipre in Rpre
                  VN[Ipre, j, Ipost] = (poverrhog[Ipre, j+1 , Ipost]-poverrhog[Ipre, j , Ipost])*pmnin[i][Ipre, j , Ipost]*goverf[Ipre, j , Ipost]
@@ -289,8 +301,8 @@ end
 
 
 return velocity,ssh,fluxes
- 
-end 
+
+end
 
 
 # Copyright (C)           2018 Alexander Barth 		<a.barth@ulg.ac.be>
@@ -308,5 +320,3 @@ end
 #
 # You should have received a copy of the GNU General Public License along with
 # this program; if not, see <http://www.gnu.org/licenses/>.
-
-

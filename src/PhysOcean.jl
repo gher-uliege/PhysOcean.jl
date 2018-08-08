@@ -1,3 +1,4 @@
+VERSION < v"0.7.0-beta2.199" && __precompile__()
 #
 # Collections of tools for physical oceanography
 
@@ -8,12 +9,13 @@
 
 module PhysOcean
 
+using Compat
+using Compat: CartesianIndices
+
 if VERSION >= v"0.7.0-beta.0"
     using Dates
     using Statistics
 else
-    using Compat
-    using Compat: CartesianIndices
     CartesianIndices(i,j) = CartesianRange(i,j)
 end
 
@@ -319,7 +321,7 @@ end
 """
     gausswin(N, α = 2.5)
 
-Return a Gaussian window with `N` points with a standard deviation of 
+Return a Gaussian window with `N` points with a standard deviation of
 (N-1)/(2 α).
 """
 function gausswin(N, α = 2.5)
@@ -357,7 +359,7 @@ end
 Provides coriolisfrequency et given latidudes in DEGREES from -90 Southpole to +90 Northpole
 """
 function coriolisfrequency(latitude)
-    
+
 
     return 2*OMEGA*sin(pi/180*latitude)
 end
@@ -368,7 +370,7 @@ end
 Provides gravity in m/s2 at ocean surface at given latidudes in DEGREES from -90 Southpole to +90 Northpole
 """
 function earthgravity(latitude)
-    
+
     latrad=pi/180*latitude
     return 9.780327*(1.0026454-0.0026512*
 	         cos(2*latrad)+0.0000058*(cos(2*latrad))^2
@@ -386,18 +388,18 @@ end
 
 
 #     X = divand.packens(sv,vars);
-    
+
 #     Xm = mean(X,2);
 #     Xp = X .- Xm;
-#     #@show mean(Xp,2)       
-    
+#     #@show mean(Xp,2)
+
 #     S = svds(Xp; nsv = nsv);
 #     eofs = divand.unpackens(sv,S[1][:U]);
-    
+
 #     m = divand.unpack(sv,Xm[:,1]);
-    
+
 #     totvar = sum(abs2,Xp)
-    
+
 #     # relative variance in percent
 #     relvar = 100 * S[1][:S].^2 / totvar
 

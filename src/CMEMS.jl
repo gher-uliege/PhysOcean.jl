@@ -86,6 +86,15 @@ function Base.next(iter::IndexFile,i)
 end
 Base.done(iter::IndexFile,i) = i == size(iter.index,1)
 
+if VERSION >= v"0.7.0"
+    function Base.iterate(iter::IndexFile, state = start(iter))
+        if done(iter,state)
+            return nothing
+        end
+
+        return next(iter,state)
+    end
+end
 
 function downloadpw(URL,username,password,log,mydownload,localname = tempname())
         print(log,"Downloading ");
