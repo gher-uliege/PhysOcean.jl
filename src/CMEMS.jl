@@ -46,9 +46,7 @@ end
 
 Base.length(iter::IndexFile) = size(iter.index,1)
 
-Base.start(iter::IndexFile) = 0
-
-function Base.next(iter::IndexFile,i)
+function nextitem(iter::IndexFile,i)
     i = i+1
 
     # ignore bogous time
@@ -84,16 +82,19 @@ function Base.next(iter::IndexFile,i)
              time_coverage_end,
              parameter),i)
 end
-Base.done(iter::IndexFile,i) = i == size(iter.index,1)
 
 if VERSION >= v"0.7.0"
-    function Base.iterate(iter::IndexFile, state = start(iter))
-        if done(iter,state)
+    function Base.iterate(iter::IndexFile, i = 0)
+        if i == size(iter.index,1)
             return nothing
         end
 
-        return next(iter,state)
+        return nextitem(iter,i)
     end
+else
+    Base.start(iter::IndexFile) = 0
+    Base.next(iter::IndexFile,i) = nextitem(iter,i)
+    Base.done(iter::IndexFile,i) = i == size(iter.index,1)
 end
 
 function downloadpw(URL,username,password,log,mydownload,localname = tempname())
