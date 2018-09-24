@@ -9,6 +9,8 @@ using Missings
 if VERSION >= v"0.7.0-beta.0"
     using Printf
     using Dates
+else
+    using Compat: @info
 end
 using Compat
 
@@ -36,7 +38,7 @@ function extract(tarnames,basedir)
         probe = split(tarnames[i],".")[3]
         dirnames[i] = joinpath(basedir,probe)
         #@show dirnames[i]
-        info("Extracting $(dirnames[i])")
+        @info "Extracting $(dirnames[i])"
         mkpath(dirnames[i])
         extracttar(tarnames[i], dirnames[i])
     end
