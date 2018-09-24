@@ -10,6 +10,7 @@ if VERSION >= v"0.7.0-beta.0"
     using Printf
     using Dates
 end
+using Compat
 
 """
     extracttar(tarname,dirname)
@@ -29,7 +30,7 @@ end
 Extract a list for tar archives (one per probe/platform) from the World Ocean Database and places them in `basedir`, e.g. basedir/CTD, basedir/XBT, ...
 """
 function extract(tarnames,basedir)
-    dirnames = Vector{String}(length(tarnames))
+    dirnames = Vector{String}(undef,length(tarnames))
 
     for i = 1:length(tarnames)
         probe = split(tarnames[i],".")[3]
