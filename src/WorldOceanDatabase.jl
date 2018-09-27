@@ -39,7 +39,7 @@ function extract(tarnames,basedir)
         extracttar(tarnames[i], dirnames[i])
     end
 
-    indexnames = [joinpath(dirnames[i],replace(basename(tarnames[i]),".tar.gz",".nc")) for i = 1:length(tarnames)]
+    indexnames = [joinpath(dirnames[i],replace(basename(tarnames[i]),".tar.gz"=>".nc")) for i = 1:length(tarnames)]
 
     return dirnames,indexnames
 end
