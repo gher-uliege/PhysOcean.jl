@@ -20,7 +20,7 @@ using Compat
 `tarname` is a tar.gz file to be extract to `dirname`.
 """
 function extracttar(tarname,dirname)
-    if is_windows()
+    if Sys.iswindows()
         exe7z = joinpath(JULIA_HOME, "7z.exe")
         run(pipeline(`$exe7z x $tarname -y -so`, `$exe7z x -si -y -ttar -o$dirname`))
     else
