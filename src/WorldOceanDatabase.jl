@@ -267,7 +267,8 @@ function download(lonrange,latrange,timerange,varname,email,basedir)
 
     # number of files available
     probes = split(probe_name,',')
-    #@show probes
+    @debug "probes $probes"
+
     probes_available = String[]
 
     waittime = 0 # time to wait in cycles
@@ -289,10 +290,10 @@ function download(lonrange,latrange,timerange,varname,email,basedir)
             end
         end
 
-        #@show waittime
-        # wait maximum 2 additional cycles after a file have become available
-        if (waittime != 0) & (i == waittime + 2)
-            #@show i,waittime
+        @debug "waittime $waittime"
+        # wait maximum 10 additional cycles after a file have become available
+        if (waittime != 0) & (i == waittime + 10)
+            @debug "break at i=$i,waittime=$waittime"
             break
         end
 
@@ -353,6 +354,7 @@ end
 Append to profiles,lons,lats,zs,times,ids
 """
 function load!(dirname,indexname,varname,profiles,lons,lats,zs,times,ids)
+    @debug "load index $indexname"
     indexnc = NCDatasets.Dataset(indexname)
 
     cast = nomissing(indexnc["cast"][:]) :: Vector{Int32}
