@@ -179,6 +179,7 @@ function download(lonr,latr,timerange,param,username,password,basedir;
                       download = download,
                       kwargs...)
         end
+        rm(indexfname)
     end
     return files
 end
