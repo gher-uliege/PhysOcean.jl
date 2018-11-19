@@ -6,6 +6,7 @@ if VERSION >= v"0.7.0-beta.0"
     using DelimitedFiles
 else
     using Compat
+    using Compat: @warn, @info
 end
 const no_qc_performed = 0
 const good_data = 1
