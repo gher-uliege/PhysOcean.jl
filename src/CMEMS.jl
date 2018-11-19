@@ -97,20 +97,36 @@ else
     Base.done(iter::IndexFile,i) = i == size(iter.index,1)
 end
 
-function downloadpw(URL,username,password,log,mydownload,localname = tempname())
-        print(log,"Downloading ");
-        printstyled(log,URL; color = :green)
-        print(log,"\n")
+function downloadpw(URL,username,password,log,mydownload,localname = tempname(); ntries = 5)
+    print(log,"Downloading ");
+    printstyled(log,URL; color = :green)
+    print(log,"\n")
 
-        if startswith(URL,"ftp")
-            mydownload(replace(URL,r"^ftp://" => "ftp://$(username):$(password)@"),localname)
-        elseif startswith(URL,"https")
-            mydownload(replace(URL,r"^https://" => "https://$(username):$(password)@"),localname)
-        else
-            mydownload(replace(URL,r"^http://" => "http://$(username):$(password)@"),localname)
+    for i=1:ntries
+        try
+            if startswith(URL,"ftp")
+                mydownload(replace(URL,r"^ftp://" => "ftp://$(username):$(password)@"),localname)
+            elseif startswith(URL,"https")
+                mydownload(replace(URL,r"^https://" => "https://$(username):$(password)@"),localname)
+            else
+                mydownload(replace(URL,r"^http://" => "http://$(username):$(password)@"),localname)
+            end
+        catch err
+            if i == ntries
+                @warn "got error $(err). Will give up and rethrow the error."
+                rethrow(err)
+            else
+                waittime = 10*i*i
+                @warn "got error $(err). Retrying after $(waittime) seconds."
+                sleep(waittime);
+            end
+
+            continue
         end
 
-        return localname
+        break
+    end
+    return localname
 end
 
 
