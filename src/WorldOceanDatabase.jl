@@ -252,6 +252,8 @@ function download(lonrange,latrange,timerange,varname,email,basedir)
 
 
     r = post(URLextract; data = Dict(
+        # net: single cast netcdf files
+        # nrc: ragged netcdf files
         "format" => "net",
         "probe_storage" => "none",
         "csv_choice" => "csv",
@@ -271,6 +273,7 @@ function download(lonrange,latrange,timerange,varname,email,basedir)
     probes_available = String[]
 
     waittime = 0 # time to wait in cycles
+    @info "Waiting for extracted files"
 
     for i = 1:1000
         for probe in probes
@@ -283,8 +286,10 @@ function download(lonrange,latrange,timerange,varname,email,basedir)
                     push!(probes_available,probe)
 
                     waittime = i
-                #else
-                    #@show "no",probe
+                else
+                    if i % 10 == 0
+                        @info "$(dataurl) is not yet available"
+                    end
                 end
             end
         end
