@@ -312,19 +312,44 @@ function download(lonrange,latrange,timerange,varname,email,basedir)
 
 
     for probe in probes_available
-        dataurl = "$(URLselect)/$(file_name).$(probe).tar.gz"
-        push!(tarnames,joinpath(basedir,"$(file_name).$(probe).tar.gz"))
 
-        for ntries = 1:3
-            try
-                Base.download(dataurl,tarnames[end])
-                # download was successful
-                break
-            catch e
-                if ntries != 3
-                    rethrow(e)
+        probe_index = 0
+
+        # look for *.CTD.tar.gz,  *.CTD2.tar.gz, ...
+        while true
+            fname_probe =
+                if probe_index == 0
+                    "$(file_name).$(probe).tar.gz"
+                else
+                    "$(file_name).$(probe)$(probe_index).tar.gz"
+                end
+
+            dataurl = "$(URLselect)/$(fname_probe)"
+            full_fname_probe = joinpath(basedir,fname_probe)
+
+            success = false
+            for ntries = 1:3
+                try
+                    Base.download(dataurl,full_fname_probe)
+                    # download was successful
+                    success = true
+                    @info "$(dataurl) downloaded"
+                    break
+                catch e
+                    if (ntries == 3) && (probe_index == 0)
+                        rethrow(e)
+                    end
                 end
             end
+
+            if success
+                push!(tarnames,full_fname_probe)
+            else
+                # go to next proble
+                break
+            end
+
+            probe_index = probe_index+1
         end
     end
 
