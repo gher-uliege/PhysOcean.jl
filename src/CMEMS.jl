@@ -170,22 +170,24 @@ julia> files = CMEMS.download(lonr,latr,timerange,param,username,password,basedi
 function download(lonr,latr,timerange,param,username,password,basedir;
                   indexURLs = [
                        # Baltic
-                       "ftp://cmems.smhi.se/Core/INSITU_BAL_TS_REP_OBSERVATIONS_013_038/index_history.txt",
+                       "ftp://my.cmems-du.eu/Core/INSITU_BAL_TS_REP_OBSERVATIONS_013_038/index_history.txt",
                        # Arctic
-                       "ftp://ftp.nodc.no/Core/INSITU_ARC_TS_REP_OBSERVATIONS_013_037/index_history.txt",
+                       "ftp://my.cmems-du.eu/Core/INSITU_ARC_TS_REP_OBSERVATIONS_013_037/index_history.txt",
                        # North West Shelf
-                       "ftp://myocean.bsh.de/Core/INSITU_NWS_TS_REP_OBSERVATIONS_013_043/index_history.txt",
+                       "ftp://my.cmems-du.eu/Core/INSITU_NWS_TS_REP_OBSERVATIONS_013_043/index_history.txt",
                        # IBI
-                       "ftp://arcas.puertos.es/Core/INSITU_IBI_TS_REP_OBSERVATIONS_013_040/index_history.txt",
+                       "ftp://my.cmems-du.eu/Core/INSITU_IBI_TS_REP_OBSERVATIONS_013_040/index_history.txt",
                        # Mediteranean Sea
-                       "ftp://medinsitu.hcmr.gr/Core/INSITU_MED_TS_REP_OBSERVATIONS_013_041/index_history.txt",
+                       "ftp://my.cmems-du.eu/Core/INSITU_MED_TS_REP_OBSERVATIONS_013_041/index_history.txt",
                        # Black Sea
-                       "ftp://vftpmo.io-bas.bg/Core/INSITU_BS_TS_REP_OBSERVATIONS_013_042/index_history.txt"
+                       "ftp://my.cmems-du.eu/Core/INSITU_BS_TS_REP_OBSERVATIONS_013_042/index_history.txt"
                    ],
                   log = stdout,
                   download = Base.download,
                   kwargs...)
 
+    # INSITU_GLO_NRT_OBSERVATIONS_013_030
+    # INSITU_ARC_NRT_OBSERVATIONS_013_031
     files = String[]
 
     for indexURL in indexURLs
