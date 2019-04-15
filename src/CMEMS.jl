@@ -351,7 +351,7 @@ function load(T,fname::TS,param; qualityflags = [good_data, probably_good_data])
 end
 
 """
-    data,lon,lat,z,time,ids = CMEMS.load(T,fnames,param; qualityflags = ...)
+    obsdata,obslon,obslat,obsz,obstime,obsids = CMEMS.load(T,fnames,param; qualityflags = ...)
 
 Load all data in the vector of file names `fnames` corresponding to the parameter
 `param` as the data type `T`. Only the data with the quality flags
