@@ -494,7 +494,6 @@ function load(T,basedir::AbstractString,varname)
             @warn "no file starting with ocldb found in directory $dirn"
         end
     end
-    @show indexnames, dirnames
     return load(T,dirnames,indexnames,varname)
 end
 
