@@ -465,18 +465,36 @@ end
 
 
 """
-    value,lon,lat,depth,obstime,id = WorldOceanDatabase.load(T,basedir::AbstractString,varname)
+    obsvalue,obslon,obslat,obsdepth,obstime,obsid = WorldOceanDatabase.load(T,basedir::AbstractString,varname)
 
 Load a list profiles under the directory `basedir` assuming `basedir` was
 populated by `WorldOceanDatabase.download`.
+
+Example:
+
+```julia
+basedir = expanduser("~/Downloads/woddownload")
+varname = "Temperature"
+obsvalue,obslon,obslat,obsdepth,obstime,obsid = WorldOceanDatabase.load(Float64,basedir,varname);
+```
+
 """
 function load(T,basedir::AbstractString,varname)
     # all directories under basedir
-    dirnames = filter(isdir,[joinpath(basedir,d) for d in readdir(basedir)])
+    dirnames = String[]
     # the files starting with ocldb (i.e. matching basedir/*/ocldb*)
+    indexnames = String[]
 
-    indexnames = [joinpath(dirn,sort(filter(d -> startswith(d,"ocldb"),readdir(dirn)))[1]) for dirn in dirnames]
-
+    for dirn in filter(isdir,[joinpath(basedir,d) for d in readdir(basedir)])
+        filelist = sort(filter(d -> startswith(d,"ocldb"),readdir(dirn)))
+        if length(filelist) != 0
+            append!(dirnames, fill(dirn, length(filelist)))
+            append!(indexnames,joinpath.(dirn, filelist))
+        else length(filelist) == 0
+            @warn "no file starting with ocldb found in directory $dirn"
+        end
+    end
+    @show indexnames, dirnames
     return load(T,dirnames,indexnames,varname)
 end
 
