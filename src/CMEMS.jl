@@ -234,11 +234,20 @@ function download!(index,lonr,latr,timerange,param,username,password,basedir,fil
                     dir = splitdir(abslocalname)[1]
                     mkpath(dir)
 
+                    downloadsuccess = true
+
                     if !isfile(abslocalname) || !skipifpresent
-                        downloadpw(url,username,password,log,download,abslocalname)
+                        try
+                            downloadpw(url,username,password,log,download,abslocalname)
+                        catch
+                            downloadsuccess = false
+                            @warn "failed to download $url"
+                        end
                     end
 
-                    push!(files,localname)
+                    if downloadsuccess
+                        push!(files,localname)
+                    end
                 end
             end
         end
