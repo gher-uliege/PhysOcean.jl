@@ -319,6 +319,10 @@ function load(T,fname::TS,param; qualityflags = [good_data, probably_good_data])
                   qualityflags = qualityflags)
 
     if ndims(lon) == 1
+        if size(lon,1) != size(data,2)
+            error("unexpected size in $(fname), size(data) = $(size(data)), size(lon) = $(size(lon))")
+        end
+
         @assert size(lon,1) == size(data,2)
         lon = repeat(reshape(lon,1,size(lon,1)),inner = (size(data,1),1))
     end
