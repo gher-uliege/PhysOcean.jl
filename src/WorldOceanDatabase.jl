@@ -10,7 +10,7 @@ if VERSION >= v"0.7.0-beta.0"
     using Printf
     using Dates
 else
-    using Compat: @info, @debug
+    using Compat: @info, @debug, @warn
 end
 using Compat
 
