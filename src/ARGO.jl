@@ -6,6 +6,8 @@ if VERSION >= v"0.7.0-beta.0"
     using Dates
 else
     using Compat: @info, @debug, @warn
+    using Missings
+    using Compat
 end
 
 const no_qc_performed = '0'
