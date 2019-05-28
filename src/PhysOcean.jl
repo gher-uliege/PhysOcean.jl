@@ -406,6 +406,17 @@ end
 #     return (m,eofs,relvar,totvar)
 # end
 
+function addprefix!(prefix,obsids)
+    if prefix == ""
+        return
+    end
+
+    for i in 1:length(obsids)
+        obsids[i] = prefix * obsids[i]
+    end
+end
+
+
 include("integraterhoprime.jl")
 include("stericheight.jl")
 include("deepestpoint.jl")
@@ -424,5 +435,9 @@ export CMEMS
 
 include("WorldOceanDatabase.jl")
 export WorldOceanDatabase
+
+include("ARGO.jl")
+export ARGO
+
 
 end

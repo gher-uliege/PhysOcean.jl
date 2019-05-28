@@ -13,6 +13,7 @@ else
     using Compat: @info, @debug, @warn
 end
 using Compat
+import PhysOcean: addprefix!
 
 """
     extracttar(tarname,dirname)
@@ -448,7 +449,7 @@ end
 
 Load a list  of directories `dirnames`.
 """
-function load(T,dirnames::Vector{<:AbstractString},indexnames,varname)
+function load(T,dirnames::Vector{<:AbstractString},indexnames,varname; prefixid = "")
     profiles = T[]
     zs = T[]
     lons = T[]
@@ -460,26 +461,30 @@ function load(T,dirnames::Vector{<:AbstractString},indexnames,varname)
         load!(dirnames[i],indexnames[i],varname,profiles,lons,lats,zs,times,ids)
     end
 
+    addprefix!(prefixid,ids)
+
     return profiles,lons,lats,zs,times,ids
 end
 
 
 """
-    obsvalue,obslon,obslat,obsdepth,obstime,obsid = WorldOceanDatabase.load(T,basedir::AbstractString,varname)
+    obsvalue,obslon,obslat,obsdepth,obstime,obsid = WorldOceanDatabase.load(T,basedir::AbstractString,varname; prefixid = "")
 
 Load a list profiles under the directory `basedir` assuming `basedir` was
-populated by `WorldOceanDatabase.download`.
+populated by `WorldOceanDatabase.download`. If the `prefixid` is specified,
+then the observations identifier are prefixed with `prefixid`.
 
 Example:
 
 ```julia
 basedir = expanduser("~/Downloads/woddownload")
 varname = "Temperature"
-obsvalue,obslon,obslat,obsdepth,obstime,obsid = WorldOceanDatabase.load(Float64,basedir,varname);
+prefixid = "1977-"
+obsvalue,obslon,obslat,obsdepth,obstime,obsid = WorldOceanDatabase.load(Float64,basedir,varname; prefixid = prefixid);
 ```
 
 """
-function load(T,basedir::AbstractString,varname)
+function load(T,basedir::AbstractString,varname; prefixid = "")
     # all directories under basedir
     dirnames = String[]
     # the files starting with ocldb (i.e. matching basedir/*/ocldb*)
@@ -494,7 +499,7 @@ function load(T,basedir::AbstractString,varname)
             @warn "no file starting with ocldb found in directory $dirn"
         end
     end
-    return load(T,dirnames,indexnames,varname)
+    return load(T,dirnames,indexnames,varname; prefixid = prefixid)
 end
 
 

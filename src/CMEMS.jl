@@ -8,6 +8,8 @@ else
     using Compat
     using Compat: @warn, @info
 end
+import PhysOcean: addprefix!
+
 const no_qc_performed = 0
 const good_data = 1
 const probably_good_data = 2
@@ -364,7 +366,8 @@ function load(T,fname::TS,param; qualityflags = [good_data, probably_good_data])
 end
 
 """
-    obsdata,obslon,obslat,obsz,obstime,obsids = CMEMS.load(T,fnames,param; qualityflags = ...)
+    obsdata,obslon,obslat,obsz,obstime,obsids = CMEMS.load(T,fnames,param;
+       qualityflags = ...,; prefixid = "")
 
 Load all data in the vector of file names `fnames` corresponding to the parameter
 `param` as the data type `T`. Only the data with the quality flags
@@ -372,35 +375,41 @@ Load all data in the vector of file names `fnames` corresponding to the paramete
 The output parameters correspondata to the data, longitude, latitude,
 depth, time (as `DateTime`) and an identifier (as `String`).
 
+If `prefixid` is specified, then the observations identifier are prefixed with `prefixid`.
+
 See also `CMEMS.download`.
 """
 function load(T,fnames::Vector{TS},param;
-              qualityflags = [good_data, probably_good_data]) where TS <: AbstractString
-    data = T[]
-    lon = T[]
-    lat = T[]
-    z = T[]
-    time = DateTime[]
-    ids = String[]
+              qualityflags = [good_data, probably_good_data],
+              prefixid = ""
+              ) where TS <: AbstractString
+    obsvalue = T[]
+    obslon = T[]
+    obslat = T[]
+    obsdepth = T[]
+    obstime = DateTime[]
+    obsids = String[]
 
     for fname in fnames
-        data_,lon_,lat_,z_,time_,ids_ = load(T,fname,param;
+        obsvalue_,obslon_,obslat_,obsdepth_,obstime_,obsids_ = load(T,fname,param;
                                              qualityflags = qualityflags)
 
-        good = falses(size(data_))
-        for i = 1:length(data_)
-            good[i] = !(isnan(data_[i]) || isnan(lon_[i]) || isnan(lat_[i]) || isnan(z_[i]) || time_[i] == fillvalueDT)
+        good = falses(size(obsvalue_))
+        for i = 1:length(obsvalue_)
+            good[i] = !(isnan(obsvalue_[i]) || isnan(obslon_[i]) || isnan(obslat_[i]) || isnan(obsdepth_[i]) || obstime_[i] == fillvalueDT)
         end
 
-        append!(data,data_[good])
-        append!(lon,lon_[good])
-        append!(lat,lat_[good])
-        append!(z,z_[good])
-        append!(time,time_[good])
-        append!(ids,ids_[good])
+        append!(obsvalue,obsvalue_[good])
+        append!(obslon,obslon_[good])
+        append!(obslat,obslat_[good])
+        append!(obsdepth,obsdepth_[good])
+        append!(obstime,obstime_[good])
+        append!(obsids,obsids_[good])
     end
 
-    return data,lon,lat,z,time,ids
+    addprefix!(prefixid,obsids)
+
+    return obsvalue,obslon,obslat,obsdepth,obstime,obsids
 end
 
 
