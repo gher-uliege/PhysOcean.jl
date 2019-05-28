@@ -166,6 +166,24 @@ depth, time (as `DateTime`) and an identifier (as `String`).
 
 If `prefixid` is specified, then the observations identifier are prefixed with `prefixid`.
 
+# Example
+```julia
+using PhysOcean, Glob
+
+# directory containing only ARGO/CORA netCDF files, e.g.
+# <basedir>/CORA-5.2-mediterrane-1950/CO_DMQCGL01_19500103_PR_SH.nc
+basedir = "/some/dir"
+filenames = glob("*/*nc",basedir)
+# load the data as double precision
+T = Float64
+# name of the variable in the NetCDF files
+varname = "TEMP"
+# EDMO code of Coriolis
+prefixid = "4630-"
+obsvalue,obslon,obslat,obsdepth,obstime,obsids = ARGO.load(T,filenames,varname;
+      prefixid = prefixid)
+```
+
 See also `CMEMS.load`.
 """
 function load(::Type{T},fnames::Vector{TS},param;

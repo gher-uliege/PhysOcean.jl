@@ -2,10 +2,9 @@ using Documenter
 using PhysOcean
 
 makedocs(
-         format = :html,
+         modules = [PhysOcean],
          sitename = "PhysOcean",
-         pages = [
-                  "index.md"]
+         pages = ["index.md"]
 )
 
 # Documenter can also automatically deploy documentation to gh-pages.
@@ -14,8 +13,4 @@ makedocs(
 
 deploydocs(
     repo = "github.com/gher-ulg/PhysOcean.jl.git",
-    target = "build",
-    julia  = "0.6",
-    deps = nothing,
-    make = nothing,    
 )
