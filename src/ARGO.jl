@@ -103,6 +103,19 @@ function loadgoodreshape(::Type{T},fillvalue,ds,ncname, qualityflags,sz,dn; varn
 end
 
 
+function repeatobsid(dc_reference,nlevels)
+    nprof = size(dc_reference,2)
+    obsids = Array{String,2}(undef,nlevels,nprof)
+    for j = 1:nprof
+        str = strip(join(@view dc_reference[:,j]))
+        for i = 1:nlevels
+            obsids[i,j] = str
+        end
+    end
+    return obsids
+end
+
+
 function load(::Type{T},filename::TS,varname,qualityflags) where TS <: AbstractString where T
 
     Dataset(filename) do ds
@@ -129,7 +142,10 @@ function load(::Type{T},filename::TS,varname,qualityflags) where TS <: AbstractS
         ncname = "JULD"
         obstime = loadgoodreshape(DateTime,fillvalueDT,ds,ncname, qualityflags,sz,dn,varname_qc = ncname * "_QC")
 
-        obsids = fill(replace(basename(filename),".nc" => ""), size(obsvalue))
+        #obsids = fill(replace(basename(filename),".nc" => ""), size(obsvalue))
+        dc_reference = ds["DC_REFERENCE"].var[:] :: Array{Char,2}
+        nlevels = ds.dim["N_LEVELS"]::Int
+        obsids = repeatobsid(dc_reference,nlevels)
 
         return obsvalue,obslon,obslat,obsdepth,obstime,obsids
     end
