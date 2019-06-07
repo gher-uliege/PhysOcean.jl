@@ -36,10 +36,10 @@ function extract(tarnames,basedir)
     dirnames = Vector{String}(undef,length(tarnames))
 
     for i = 1:length(tarnames)
-        probe = split(tarnames[i],".")[3]
+        probe = split(basename(tarnames[i]),".")[3]
         dirnames[i] = joinpath(basedir,probe)
         #@show dirnames[i]
-        @info "Extracting $(dirnames[i])"
+        @info "Extracting $(tarnames[i]) to $(dirnames[i])"
         mkpath(dirnames[i])
         extracttar(tarnames[i], dirnames[i])
     end
@@ -458,6 +458,7 @@ function load(T,dirnames::Vector{<:AbstractString},indexnames,varname; prefixid 
     ids = String[]
 
     for i = 1:length(dirnames)
+        @info "Loading files from $(indexnames[i])"
         load!(dirnames[i],indexnames[i],varname,profiles,lons,lats,zs,times,ids)
     end
 
