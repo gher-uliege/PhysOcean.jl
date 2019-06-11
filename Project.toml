@@ -4,7 +4,7 @@ keywords = ["physical-oceanography", "sea-water", "julia", "density", "fluxes", 
 license = "LGPL"
 desc = "Utility functions for physical oceanography"
 author = ["Alexander Barth", "Jean-Marie Beckers", "Charles Troupin", "Aida Alvera Azcarate"]
-version = "0.5.1"
+version = "0.5.2"
 
 [deps]
 AbstractTrees = "1520ce14-60c1-5f80-bbc7-55ef81b5835c"
