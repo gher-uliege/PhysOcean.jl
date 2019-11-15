@@ -309,17 +309,34 @@ function download(lonrange,latrange,timerange,varname,email,basedir)
     sleep(2)
 
     mkpath(basedir)
-    tarnames = String[]
+    tarnames = downloadready(file_name,probes_available,basedir; URLselect = URLselect)
 
+    dirnames,indexnames = extract(tarnames,basedir)
+    return dirnames,indexnames
+end
+
+"""
+
+Example:
+
+```julia
+file_name = "ocldb1553463278.17588"
+probes_available = ["OSD","CTD","PFL","UOR","GLD"]
+basedir = expanduser("~/Data/WOD")
+WorldOceanDatabase.downloadready(file_name,probes_available,basedir)
+```
+"""
+function downloadready(file_name,probes_available,basedir; URLselect = "https://data.nodc.noaa.gov/woa/WOD/SELECT/")
+    tarnames = String[]
 
     for probe in probes_available
 
-        probe_index = 0
+        probe_index = 1
 
         # look for *.CTD.tar.gz,  *.CTD2.tar.gz, ...
         while true
             fname_probe =
-                if probe_index == 0
+                if probe_index == 1
                     "$(file_name).$(probe).tar.gz"
                 else
                     "$(file_name).$(probe)$(probe_index).tar.gz"
@@ -331,13 +348,14 @@ function download(lonrange,latrange,timerange,varname,email,basedir)
             success = false
             for ntries = 1:3
                 try
+                    @debug "dataurl: $dataurl"
                     Base.download(dataurl,full_fname_probe)
                     # download was successful
                     success = true
                     @info "$(dataurl) downloaded"
                     break
                 catch e
-                    if (ntries == 3) && (probe_index == 0)
+                    if (ntries == 3) && (probe_index == 1)
                         rethrow(e)
                     end
                 end
@@ -353,11 +371,10 @@ function download(lonrange,latrange,timerange,varname,email,basedir)
             probe_index = probe_index+1
         end
     end
-
-
-    dirnames,indexnames = extract(tarnames,basedir)
-    return dirnames,indexnames
+    return tarnames
 end
+
+
 
 """
      load(T,dirname,indexname,varname)
