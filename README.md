@@ -19,13 +19,15 @@ Your need [Julia](http://julialang.org) to use `PhysOcean`. The command line ver
 Inside Julia, you can download and install the package by issuing:
 
 ```julia
+using Pkg
 Pkg.add("PhysOcean")
 ```
 
 Or if you want to use the latest version, you can use the following command:
 
 ```julia
-Pkg.clone("https://github.com/gher-ulg/PhysOcean.jl")
+using Pkg
+Pkg.add(PackageSpec(name="PhysOcean", rev="master"))
 ```
 
 # Testing
@@ -34,6 +36,7 @@ A test script is included to verify the correct functioning of the toolbox.
 The script should be run in a Julia session.
 
 ```julia
+using Pkg
 Pkg.test("PhysOcean")
 ```
 

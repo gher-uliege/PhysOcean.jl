@@ -88,9 +88,15 @@ CMEMS.download
 CMEMS.load
 ```
 
-## World Ocean Database (NODC)
+## World Ocean Database (US NODC)
 
 ```@docs
 WorldOceanDatabase.download
 WorldOceanDatabase.load
+```
+
+## ARGO
+
+```@docs
+ARGO.load
 ```

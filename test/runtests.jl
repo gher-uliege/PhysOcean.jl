@@ -203,4 +203,5 @@ end
 
 
     include("test_cmems.jl")
+    include("test_argo.jl")
 end

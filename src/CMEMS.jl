@@ -8,6 +8,8 @@ else
     using Compat
     using Compat: @warn, @info
 end
+import PhysOcean: addprefix!
+
 const no_qc_performed = 0
 const good_data = 1
 const probably_good_data = 2
@@ -170,22 +172,24 @@ julia> files = CMEMS.download(lonr,latr,timerange,param,username,password,basedi
 function download(lonr,latr,timerange,param,username,password,basedir;
                   indexURLs = [
                        # Baltic
-                       "ftp://cmems.smhi.se/Core/INSITU_BAL_TS_REP_OBSERVATIONS_013_038/index_history.txt",
+                       "ftp://my.cmems-du.eu/Core/INSITU_BAL_TS_REP_OBSERVATIONS_013_038/index_history.txt",
                        # Arctic
-                       "ftp://ftp.nodc.no/Core/INSITU_ARC_TS_REP_OBSERVATIONS_013_037/index_history.txt",
+                       "ftp://my.cmems-du.eu/Core/INSITU_ARC_TS_REP_OBSERVATIONS_013_037/index_history.txt",
                        # North West Shelf
-                       "ftp://myocean.bsh.de/Core/INSITU_NWS_TS_REP_OBSERVATIONS_013_043/index_history.txt",
+                       "ftp://my.cmems-du.eu/Core/INSITU_NWS_TS_REP_OBSERVATIONS_013_043/index_history.txt",
                        # IBI
-                       "ftp://arcas.puertos.es/Core/INSITU_IBI_TS_REP_OBSERVATIONS_013_040/index_history.txt",
+                       "ftp://my.cmems-du.eu/Core/INSITU_IBI_TS_REP_OBSERVATIONS_013_040/index_history.txt",
                        # Mediteranean Sea
-                       "ftp://medinsitu.hcmr.gr/Core/INSITU_MED_TS_REP_OBSERVATIONS_013_041/index_history.txt",
+                       "ftp://my.cmems-du.eu/Core/INSITU_MED_TS_REP_OBSERVATIONS_013_041/index_history.txt",
                        # Black Sea
-                       "ftp://vftpmo.io-bas.bg/Core/INSITU_BS_TS_REP_OBSERVATIONS_013_042/index_history.txt"
+                       "ftp://my.cmems-du.eu/Core/INSITU_BS_TS_REP_OBSERVATIONS_013_042/index_history.txt"
                    ],
                   log = stdout,
                   download = Base.download,
                   kwargs...)
 
+    # INSITU_GLO_NRT_OBSERVATIONS_013_030
+    # INSITU_ARC_NRT_OBSERVATIONS_013_031
     files = String[]
 
     for indexURL in indexURLs
@@ -232,11 +236,20 @@ function download!(index,lonr,latr,timerange,param,username,password,basedir,fil
                     dir = splitdir(abslocalname)[1]
                     mkpath(dir)
 
+                    downloadsuccess = true
+
                     if !isfile(abslocalname) || !skipifpresent
-                        downloadpw(url,username,password,log,download,abslocalname)
+                        try
+                            downloadpw(url,username,password,log,download,abslocalname)
+                        catch
+                            downloadsuccess = false
+                            @warn "failed to download $url"
+                        end
                     end
 
-                    push!(files,localname)
+                    if downloadsuccess
+                        push!(files,localname)
+                    end
                 end
             end
         end
@@ -308,6 +321,10 @@ function load(T,fname::TS,param; qualityflags = [good_data, probably_good_data])
                   qualityflags = qualityflags)
 
     if ndims(lon) == 1
+        if size(lon,1) != size(data,2)
+            error("unexpected size in $(fname), size(data) = $(size(data)), size(lon) = $(size(lon))")
+        end
+
         @assert size(lon,1) == size(data,2)
         lon = repeat(reshape(lon,1,size(lon,1)),inner = (size(data,1),1))
     end
@@ -349,7 +366,8 @@ function load(T,fname::TS,param; qualityflags = [good_data, probably_good_data])
 end
 
 """
-    data,lon,lat,z,time,ids = CMEMS.load(T,fnames,param; qualityflags = ...)
+    obsdata,obslon,obslat,obsz,obstime,obsids = CMEMS.load(T,fnames,param;
+       qualityflags = ...,; prefixid = "")
 
 Load all data in the vector of file names `fnames` corresponding to the parameter
 `param` as the data type `T`. Only the data with the quality flags
@@ -357,35 +375,41 @@ Load all data in the vector of file names `fnames` corresponding to the paramete
 The output parameters correspondata to the data, longitude, latitude,
 depth, time (as `DateTime`) and an identifier (as `String`).
 
+If `prefixid` is specified, then the observations identifier are prefixed with `prefixid`.
+
 See also `CMEMS.download`.
 """
 function load(T,fnames::Vector{TS},param;
-              qualityflags = [good_data, probably_good_data]) where TS <: AbstractString
-    data = T[]
-    lon = T[]
-    lat = T[]
-    z = T[]
-    time = DateTime[]
-    ids = String[]
+              qualityflags = [good_data, probably_good_data],
+              prefixid = ""
+              ) where TS <: AbstractString
+    obsvalue = T[]
+    obslon = T[]
+    obslat = T[]
+    obsdepth = T[]
+    obstime = DateTime[]
+    obsids = String[]
 
     for fname in fnames
-        data_,lon_,lat_,z_,time_,ids_ = load(T,fname,param;
+        obsvalue_,obslon_,obslat_,obsdepth_,obstime_,obsids_ = load(T,fname,param;
                                              qualityflags = qualityflags)
 
-        good = falses(size(data_))
-        for i = 1:length(data_)
-            good[i] = !(isnan(data_[i]) || isnan(lon_[i]) || isnan(lat_[i]) || isnan(z_[i]) || time_[i] == fillvalueDT)
+        good = falses(size(obsvalue_))
+        for i = 1:length(obsvalue_)
+            good[i] = !(isnan(obsvalue_[i]) || isnan(obslon_[i]) || isnan(obslat_[i]) || isnan(obsdepth_[i]) || obstime_[i] == fillvalueDT)
         end
 
-        append!(data,data_[good])
-        append!(lon,lon_[good])
-        append!(lat,lat_[good])
-        append!(z,z_[good])
-        append!(time,time_[good])
-        append!(ids,ids_[good])
+        append!(obsvalue,obsvalue_[good])
+        append!(obslon,obslon_[good])
+        append!(obslat,obslat_[good])
+        append!(obsdepth,obsdepth_[good])
+        append!(obstime,obstime_[good])
+        append!(obsids,obsids_[good])
     end
 
-    return data,lon,lat,z,time,ids
+    addprefix!(prefixid,obsids)
+
+    return obsvalue,obslon,obslat,obsdepth,obstime,obsids
 end
 
 

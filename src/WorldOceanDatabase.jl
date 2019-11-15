@@ -10,9 +10,10 @@ if VERSION >= v"0.7.0-beta.0"
     using Printf
     using Dates
 else
-    using Compat: @info, @debug
+    using Compat: @info, @debug, @warn
 end
 using Compat
+import PhysOcean: addprefix!
 
 """
     extracttar(tarname,dirname)
@@ -35,10 +36,10 @@ function extract(tarnames,basedir)
     dirnames = Vector{String}(undef,length(tarnames))
 
     for i = 1:length(tarnames)
-        probe = split(tarnames[i],".")[3]
+        probe = split(basename(tarnames[i]),".")[3]
         dirnames[i] = joinpath(basedir,probe)
         #@show dirnames[i]
-        @info "Extracting $(dirnames[i])"
+        @info "Extracting $(tarnames[i]) to $(dirnames[i])"
         mkpath(dirnames[i])
         extracttar(tarnames[i], dirnames[i])
     end
@@ -465,7 +466,7 @@ end
 
 Load a list  of directories `dirnames`.
 """
-function load(T,dirnames::Vector{<:AbstractString},indexnames,varname)
+function load(T,dirnames::Vector{<:AbstractString},indexnames,varname; prefixid = "")
     profiles = T[]
     zs = T[]
     lons = T[]
@@ -474,27 +475,49 @@ function load(T,dirnames::Vector{<:AbstractString},indexnames,varname)
     ids = String[]
 
     for i = 1:length(dirnames)
+        @info "Loading files from $(indexnames[i])"
         load!(dirnames[i],indexnames[i],varname,profiles,lons,lats,zs,times,ids)
     end
+
+    addprefix!(prefixid,ids)
 
     return profiles,lons,lats,zs,times,ids
 end
 
 
 """
-    value,lon,lat,depth,obstime,id = WorldOceanDatabase.load(T,basedir::AbstractString,varname)
+    obsvalue,obslon,obslat,obsdepth,obstime,obsid = WorldOceanDatabase.load(T,basedir::AbstractString,varname; prefixid = "")
 
 Load a list profiles under the directory `basedir` assuming `basedir` was
-populated by `WorldOceanDatabase.download`.
+populated by `WorldOceanDatabase.download`. If the `prefixid` is specified,
+then the observations identifier are prefixed with `prefixid`.
+
+Example:
+
+```julia
+basedir = expanduser("~/Downloads/woddownload")
+varname = "Temperature"
+prefixid = "1977-"
+obsvalue,obslon,obslat,obsdepth,obstime,obsid = WorldOceanDatabase.load(Float64,basedir,varname; prefixid = prefixid);
+```
+
 """
-function load(T,basedir::AbstractString,varname)
+function load(T,basedir::AbstractString,varname; prefixid = "")
     # all directories under basedir
-    dirnames = filter(isdir,[joinpath(basedir,d) for d in readdir(basedir)])
+    dirnames = String[]
     # the files starting with ocldb (i.e. matching basedir/*/ocldb*)
+    indexnames = String[]
 
-    indexnames = [joinpath(dirn,sort(filter(d -> startswith(d,"ocldb"),readdir(dirn)))[1]) for dirn in dirnames]
-
-    return load(T,dirnames,indexnames,varname)
+    for dirn in filter(isdir,[joinpath(basedir,d) for d in readdir(basedir)])
+        filelist = sort(filter(d -> startswith(d,"ocldb"),readdir(dirn)))
+        if length(filelist) != 0
+            append!(dirnames, fill(dirn, length(filelist)))
+            append!(indexnames,joinpath.(dirn, filelist))
+        else length(filelist) == 0
+            @warn "no file starting with ocldb found in directory $dirn"
+        end
+    end
+    return load(T,dirnames,indexnames,varname; prefixid = prefixid)
 end
 
 
