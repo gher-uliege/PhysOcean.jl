@@ -7,14 +7,11 @@ PhysOcean
 
 ```@docs
 density(S,T,p)
-```
-
-```@docs
 secant_bulk_modulus(S,T,p)
-```
-
-```@docs
 freezing_temperature(S)
+potential_temperature
+potential_density
+PhysOcean.N²
 ```
 
 # Heat fluxes

@@ -83,6 +83,14 @@ end
     # Reference page 43 of UNESCO report
     @test potential_temperature(40.,40. /  1.00024,10000,0) * 1.00024 ≈ 36.89073 atol=1e-5
 
+    # Reference page 42 of UNESCO report
+    @test PhysOcean.depth(10_000,30) ≈ 9712.653 atol=1e-4
+
+    # >> format long
+    # >> sw_bfrq([0.,15.,30.,35.],[15.,15,15,15],[0.,250,500,1000],30.)
+    N²_ref = 1.0e-03 * [ 0.451543647810379, 0.445598092244291, 0.074099678791248]
+    @test PhysOcean.N²([0.,15.,30.,35.],[15.,15,15,15],[0.,250,500,1000],30.) ≈ N²_ref
+
     # load CastAway file
     filename = joinpath(dirname(@__FILE__),"20160622_0747_TC100.csv")
     data,header,metadata = loadcastaway(filename)
