@@ -1,13 +1,8 @@
 module CMEMS
 
 using NCDatasets
-if VERSION >= v"0.7.0-beta.0"
-    using Dates
-    using DelimitedFiles
-else
-    using Compat
-    using Compat: @warn, @info
-end
+using Dates
+using DelimitedFiles
 import PhysOcean: addprefix!
 
 const no_qc_performed = 0
@@ -86,18 +81,12 @@ function nextitem(iter::IndexFile,i)
              parameter),i)
 end
 
-if VERSION >= v"0.7.0"
-    function Base.iterate(iter::IndexFile, i = 0)
-        if i == size(iter.index,1)
-            return nothing
-        end
-
-        return nextitem(iter,i)
+function Base.iterate(iter::IndexFile, i = 0)
+    if i == size(iter.index,1)
+        return nothing
     end
-else
-    Base.start(iter::IndexFile) = 0
-    Base.next(iter::IndexFile,i) = nextitem(iter,i)
-    Base.done(iter::IndexFile,i) = i == size(iter.index,1)
+
+    return nextitem(iter,i)
 end
 
 function downloadpw(URL,username,password,log,mydownload,localname = tempname(); ntries = 5)

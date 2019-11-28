@@ -72,17 +72,12 @@ function myfilter3(A::AbstractArray,fillvalue,isfixed,ntimes=1)
             # Define out[I] fillvalue
             out[I] = fillvalue
             if dvisvalue(B[I])
-                RJ =
-                    @static if VERSION >= v"0.7.0"
-                        # https://github.com/JuliaLang/julia/issues/15276#issuecomment-297596373
-                        # let block work-around
-                        let I = I, I1 = I1, Iend = Iend
-                            CartesianIndices(ntuple(
-                                i-> max(I1[i], I[i]-I1[i]):min(Iend[i], I[i]+I1[i]),nd))
-                        end
-                    else
-                        CartesianIndices(max(I1, I-I1), min(Iend, I+I1))
-                    end
+                # https://github.com/JuliaLang/julia/issues/15276#issuecomment-297596373
+                # let block work-around
+                RJ = let I = I, I1 = I1, Iend = Iend
+                    CartesianIndices(ntuple(
+                        i-> max(I1[i], I[i]-I1[i]):min(Iend[i], I[i]+I1[i]),nd))
+                end
 
                 for J in RJ
                     # If not a fill value
@@ -276,12 +271,7 @@ dummy=integraterhoprime(VN./pmnin[i],xiin[dim],dim)
 
 
 
-fluxi =
-    if VERSION >= v"0.7.0-beta2"
-        dropdims(sum(dummy[ind1...],dims = i),dims = i)
-    else
-        squeeze(sum(dummy[ind1...],i),i)
-    end
+fluxi = dropdims(sum(dummy[ind1...],dims = i),dims = i)
 
 #@show size(fluxi), var(fluxi),mean(VN),var(VN)
 

@@ -28,12 +28,7 @@ function loadcastaway(stream::IOStream)
         line = chomp(lines[i])
 
         if startswith(line,"% ")
-            keyvalue =
-                if VERSION >= v"0.7.0-beta.0"
-                    replace(line,r"^% " => "")
-                else
-                    replace(line,r"^% ","")
-                end
+            keyvalue = replace(line,r"^% " => "")
 
             if occursin(",",keyvalue)
                 key,value = split(keyvalue,",",limit = 2)

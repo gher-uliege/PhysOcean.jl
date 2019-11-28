@@ -2,13 +2,7 @@ module ARGO
 
 using NCDatasets
 import PhysOcean: addprefix!
-if VERSION >= v"0.7.0-beta.0"
-    using Dates
-else
-    using Compat: @info, @debug, @warn
-    using Missings
-    using Compat
-end
+using Dates
 
 const no_qc_performed = '0'
 const good_data = '1'

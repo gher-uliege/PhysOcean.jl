@@ -36,18 +36,13 @@ function floodfill!(A::AbstractArray,B::AbstractArray,fillvalue;MAXITER=())
 
             B[I] = A[I]
             if !dvisvalue(A[I])
+                # https://github.com/JuliaLang/julia/issues/15276#issuecomment-297596373
+                # let block work-around
                 RJ =
-                    @static if VERSION >= v"0.7.0"
-                        # https://github.com/JuliaLang/julia/issues/15276#issuecomment-297596373
-                        # let block work-around
-                        let I = I, I1 = I1, Iend = Iend
-                            CartesianIndices(ntuple(
-                                i-> max(I1[i], I[i]-I1[i]):min(Iend[i], I[i]+I1[i]),nd))
-                        end
-                    else
-                        CartesianIndices(max(I1, I-I1), min(Iend, I+I1))
+                    let I = I, I1 = I1, Iend = Iend
+                        CartesianIndices(ntuple(
+                            i-> max(I1[i], I[i]-I1[i]):min(Iend[i], I[i]+I1[i]),nd))
                     end
-
 
                 for J in RJ
                     if dvisvalue(A[J])

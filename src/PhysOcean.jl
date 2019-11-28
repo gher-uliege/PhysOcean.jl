@@ -1,5 +1,3 @@
-VERSION < v"0.7.0-beta2.199" && __precompile__()
-#
 # Collections of tools for physical oceanography
 
 # Authors:
@@ -12,18 +10,9 @@ module PhysOcean
 using Compat
 using Compat: CartesianIndices
 
-if VERSION >= v"0.7.0-beta.0"
-    using Dates
-    using Statistics
-else
-    CartesianIndices(i,j) = CartesianRange(i,j)
-end
+using Dates
+using Statistics
 
-if v"0.7.0-beta2" <= VERSION < v"0.7.0-beta2.188"
-    const dropdims = squeeze
-end
-
-#import divand
 
 # temperature in Kelvin of 0 degree Celsius
 const TK = 273.15
@@ -39,11 +28,7 @@ function nansum(x,dim)
     m = isnan.(x)
     x2 = copy(x)
     x2[m] .= 0
-    @static if VERSION >= v"0.7.0-beta.0"
-        return sum(x2,dims = dim)
-    else
-        return sum(x2,dim)
-    end
+    return sum(x2,dims = dim)
 end
 
 function nanmean(x)
@@ -55,11 +40,7 @@ function nanmean(x,dim)
     x2 = copy(x)
     x2[m] .= 0
 
-    @static if VERSION >= v"0.7.0-beta.0"
-        return sum(x2,dims = dim) ./ sum(.!m,dims = dim)
-    else
-        return sum(x2,dim) ./ sum(.!m,dim)
-    end
+    return sum(x2,dims = dim) ./ sum(.!m,dims = dim)
 end
 
 
