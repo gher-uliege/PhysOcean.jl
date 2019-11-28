@@ -62,6 +62,27 @@ end
     @test secant_bulk_modulus(35,10,0) ≈ 2.269535808268893e+04
     @test secant_bulk_modulus(35,10,1000) ≈ 2.303294089994505e+04
 
+    # reference values from octave using matlab sw toolbox
+    #
+    # >> format long
+    # >> sw_adtg(35.,20.,10)
+    # ans =    1.84387209878308e-04
+    # >> sw_ptmp(35.,20.,10,0)
+    # ans =  19.9981570426625
+    # >> sw_pdens(35.,20.,1000,0)
+    # ans =  1024.81108126767
+
+    @test adiabatic_temperature_gradient(35.,20.,10) ≈ 1.84387209878308e-04
+
+    @test potential_temperature(35.,20.,1000,0) ≈ 19.8122912486651
+    @test potential_density(35.,20.,1000,0) ≈ 1024.81108126767
+
+    # Reference page 44 of UNESCO report
+    @test adiabatic_temperature_gradient(40.,40/1.00024,10_000) ≈ 3.255976e-4 atol=1e-10
+
+    # Reference page 43 of UNESCO report
+    @test potential_temperature(40.,40. /  1.00024,10000,0) * 1.00024 ≈ 36.89073 atol=1e-5
+
     # load CastAway file
     filename = joinpath(dirname(@__FILE__),"20160622_0747_TC100.csv")
     data,header,metadata = loadcastaway(filename)

@@ -223,6 +223,78 @@ Compute the freezing temperature (in degree Celsius) of sea-water based on the s
 freezing_temperature(S) = (-0.0575 + 1.710523e-3 * sqrt(S) - 2.154996e-4 * S) * S
 
 
+function _adiabatic_temperature_gradient_t68(S,T,P)
+    ΔS = S - 35.
+
+    ATG = ((((-2.1687e-16*T + 1.8676e-14)*T - 4.6206e-13)*P
+            + ((2.7759e-12 * T - 1.1351e-10) * ΔS +
+               ((-5.4481e-14*T + 8.733E-12)*T
+                -6.7795e-10)*T + 1.8741e-8))*P
+           +(-4.2393e-8 * T + 1.8932e-6) * ΔS
+           +((6.6228e-10 * T - 6.836e-8)*T + 8.5258e-6)*T + 3.5803e-5)
+    return ATG
+end
+
+"""
+    adiabatic_temperature_gradient(S,T,P)
+
+Compute the adiabatic temperature gradient (degree C/decibar)
+of a water mass with the salinity `S` (psu, PSS-78) ) and
+temperature `T` (degree C, ITS-90)) at the pressure `P` (db)
+using the UNESCO polynomial 1983, page 44.
+
+"""
+function adiabatic_temperature_gradient(S,T,P)
+    # convert to T68
+    T68 = 1.00024 * T
+    _adiabatic_temperature_gradient_t68(S,T68,P)
+end
+export adiabatic_temperature_gradient
+
+"""
+    potential_temperature(S,T,P,PR)
+
+Potential temperature (degree C, ITS-90) as per UNESCO 1983 report of a water
+mass with the salinity `S` (psu, PSS-78) and temperature `T` (degree C, ITS-90) at the pressure `P` (db)
+relative to the reference pressure `PR` (db).
+"""
+function potential_temperature(S,T,P,PR)
+    T68 = 1.00024 * T
+
+    # 4th order Runge-Kutta
+    ΔP = PR - P
+    Δθ₁ = ΔP * _adiabatic_temperature_gradient_t68(S,T68,P)
+    θ₁ = T68 + Δθ₁ / 2
+
+    Δθ₂ = ΔP * _adiabatic_temperature_gradient_t68(S,θ₁,P + ΔP/2)
+    q₁ = Δθ₁
+    θ₂ = θ₁ + (1 - 1/sqrt(2)) * (Δθ₂ - q₁)
+
+    Δθ₃ = ΔP * _adiabatic_temperature_gradient_t68(S,θ₂,P + ΔP/2)
+    q₂ = (2 - sqrt(2)) * Δθ₂ + (-2 + 3/sqrt(2)) * q₁
+    θ₃ = θ₂ + (1 + 1/sqrt(2)) * (Δθ₃ - q₂)
+
+    Δθ₄ = ΔP * _adiabatic_temperature_gradient_t68(S,θ₃,P + ΔP)
+    q₃ = (2 + sqrt(2)) * Δθ₃ + (-2 - 3/sqrt(2)) * q₂
+    θ₄ = θ₃ + (Δθ₄ - 2q₃)/6
+
+    return θ₄ / 1.00024
+end
+
+export potential_temperature
+
+"""
+    potential_density(S,T,P,PR)
+Potential density (kg/m^3) of a water mass with the salinity `S`
+(psu (PSS-78) ) and temperature `T` (degree C (ITS-90)) at the pressure `P` (db)
+relative to the reference pressure `PR` (db).
+"""
+function potential_density(S,T,P,PR)
+    θ = potential_temperature(S,T,P,PR)
+    return density(S,θ,PR)
+end
+export potential_density
+
 """
     latentflux(Ts,Ta,r,w,pa)
 
