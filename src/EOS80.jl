@@ -248,7 +248,7 @@ and latitude `lat` is degrees.
 
 https://web.archive.org/web/20191128093534/http://usjgofs.whoi.edu/datasys/depthTM-calculated.html
 """
-function depth(P,lat)
+function depth(P,lat::Number)
     X = sind(lat)
     X² = X^2
     # GRAVITY VARIATION WITH LAT: ANON (1970) BULLETIN GEODESIQUE
