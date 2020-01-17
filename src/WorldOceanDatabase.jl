@@ -18,7 +18,11 @@ import PhysOcean: addprefix!
 """
 function extracttar(tarname,dirname)
     if Sys.iswindows()
-        exe7z = joinpath(JULIA_HOME, "7z.exe")
+        exe7z = joinpath(Sys.BINDIR, "7z.exe")
+        if isdefined(Base, :LIBEXECDIR)
+            exe7z = joinpath(Sys.BINDIR, Base.LIBEXECDIR, "7z.exe")
+        end
+
         run(pipeline(`$exe7z x $tarname -y -so`, `$exe7z x -si -y -ttar -o$dirname`))
     else
         run(`tar xzf $(tarname) --directory=$(dirname)`)
