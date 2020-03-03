@@ -261,6 +261,8 @@ include("streamfunctionvolumeflux.jl")
 
 export nanmean, nansum, gausswin, vaporpressure, solarflux, sensibleflux, gaussfilter, longwaveflux, latentflux, datetime_matlab, freezing_temperature, density, secant_bulk_modulus, coriolisfrequency, earthgravity, integraterhoprime, stericheight, deepestpoint, floodfill!, addlowtoheighdimension, geostrophy, streamfunctionvolumeflux
 
+include("tides.jl")
+
 include("castaway.jl")
 export loadcastaway
 

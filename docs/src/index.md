@@ -75,7 +75,12 @@ geostrophy(mask::BitArray,rhop,pmnin,xiin;dim::Integer=0,ssh=(),znomotion=0,fill
 streamfunctionvolumeflux(mask::BitArray,velocities,pmnin,xiin;dim::Integer=0)
 ```
 
+# Tides
 
+```@docs
+ap2ep
+ep2ap
+```
 # Data download
 
 ## CMEMS

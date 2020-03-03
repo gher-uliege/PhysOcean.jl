@@ -233,4 +233,5 @@ end
 
     include("test_cmems.jl")
     include("test_argo.jl")
+    include("test_tides.jl")
 end
