@@ -25,7 +25,7 @@ function floodfill!(A::AbstractArray,B::AbstractArray,fillvalue;MAXITER=())
     cw=1
     iter=0
 
-    RI = Compat.CartesianIndices(size(A))
+    RI = CartesianIndices(size(A))
     I1, Iend = first(RI), last(RI)
 	needtocontinue=true
     while needtocontinue

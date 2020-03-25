@@ -7,9 +7,6 @@
 
 module PhysOcean
 
-using Compat
-using Compat: CartesianIndices
-
 using Dates
 using Statistics
 

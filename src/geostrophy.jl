@@ -63,7 +63,7 @@ function myfilter3(A::AbstractArray,fillvalue,isfixed,ntimes=1)
         B=A
     end
 
-    RI = Compat.CartesianIndices(size(A))
+    RI = CartesianIndices(size(A))
     I1, Iend = first(RI), last(RI)
     for nn=1:ntimes
 
