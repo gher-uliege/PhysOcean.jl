@@ -49,6 +49,9 @@ function extract(tarnames,basedir)
 end
 
 function post(url; data = Dict())
+    @debug "post URL: $url"
+    @debug "post data: $data"
+
     r = HTTP.request(
         "POST",url,
         [("Content-Type" => "application/x-www-form-urlencoded")],
@@ -67,6 +70,23 @@ function savereq(r,fname)
     open(fname,"w") do f
         write(f,r)
     end
+end
+
+
+function getinputs(doc)
+    data = Dict{String,String}()
+    for elem in PreOrderDFS(doc.root);
+        if isa(elem,Gumbo.HTMLElement);
+            if Gumbo.tag(elem) == :input
+                a = Gumbo.attrs(elem);
+                if ("name" in keys(a)) && ("value" in keys(a))
+                    data[a["name"]] = a["value"]
+                    #@show a["name"],a["value"]
+                end
+            end;
+        end;
+    end
+    return data
 end
 
 
@@ -127,9 +147,12 @@ function download(lonrange,latrange,timerange,varname,email,basedir)
     west,east = lonrange[[1,end]]
     south,north = latrange[[1,end]]
     datestart,dateend = timerange[[1,end]]
-    URL = "https://www.nodc.noaa.gov/cgi-bin/OC5/SELECT/dbsearch.pl"
-    URLextract = "https://www.nodc.noaa.gov/cgi-bin/OC5/SELECT/dbextract.pl"
-    URLselect = "https://data.nodc.noaa.gov/woa/WOD/SELECT/"
+    #URL = "https://www.nodc.noaa.gov/cgi-bin/OC5/SELECT/dbsearch.pl"
+    URL = "https://www.ncei.noaa.gov/access/world-ocean-database-select/bin/dbsearch.pl"
+    #URLextract = "https://www.nodc.noaa.gov/cgi-bin/OC5/SELECT/dbextract.pl"
+    URLextract = "https://www.ncei.noaa.gov/access/world-ocean-database-select/bin/dbextract.pl"
+    #URLselect = "https://data.nodc.noaa.gov/woa/WOD/SELECT/"
+    URLselect = "https://www.ncei.noaa.gov/access/world-ocean-database-select/OCLdb_output"
 
     # names from the WOD web portal
     variables = Dict(
@@ -190,7 +213,8 @@ function download(lonrange,latrange,timerange,varname,email,basedir)
     #probe_name = "OSD,CTD,XBT,MBT,PFL,DRB,MRB,APB,UOR,SUR,GLD"
 
     r = post(URL; data = Dict(
-        "north" => north, "west" => west, "east" => east, "south" =>  south,
+        "northbc" => north, "westbc" => west,
+        "eastbc" => east, "southbc" =>  south,
         "yearstart" => Dates.year(datestart),
         "monthstart" => Dates.month(datestart),
         "daystart" => Dates.day(datestart),
@@ -205,10 +229,16 @@ function download(lonrange,latrange,timerange,varname,email,basedir)
     savereq(r,"out2.html")
 
     doc = Gumbo.parsehtml(r)
+    data = getinputs(doc)
+
+    while !("file_name" in keys(data))
+        sleep(10)
+        r = post(URL; data = data)
+        doc = Gumbo.parsehtml(r)
+        data = getinputs(doc)
+    end
 
     data = Dict{String,String}("what" => "DOWNLOAD DATA")
-
-
 
     for elem in PreOrderDFS(doc.root);
         if isa(elem,Gumbo.HTMLElement);
@@ -244,6 +274,7 @@ function download(lonrange,latrange,timerange,varname,email,basedir)
 
     r = post(URLextract; data = data)
     #curl 'https://www.nodc.noaa.gov/cgi-bin/OC5/SELECT/dbextract.pl' -H 'Host: www.nodc.noaa.gov' -H 'User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:55.0) Gecko/20100101 Firefox/55.0' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Accept-Language: de,en-US;q=0.7,en;q=0.3' --compressed -H 'Content-Type: application/x-www-form-urlencoded' -H 'Referer: https://www.nodc.noaa.gov/cgi-bin/OC5/SELECT/dbsearch.pl' -H 'DNT: 1' -H 'Connection: keep-alive' -H 'Upgrade-Insecure-Requests: 1' --data "what=DOWNLOAD+DATA&file_name=$filename&probe_name=OSD%2CCTD%2CXBT%2CMBT%2CPFL%2CDRB%2CMRB%2CAPB%2CUOR%2CSUR%2CGLD&query_results=%3A$yearstart%3A$yearend%3A1%3A1%3A1%3A1%3A$west%3A$east%3A$north%3A$south%3AOSD%2CCTD%2CXBT%2CMBT%2CPFL%2CDRB%2CMRB%2CAPB%2CUOR%2CSUR%2CGLD%3A%3A%3A$tem%3A%3A%3A%3A%3A%3A%3A%3A%3A%3A" > out3.html
+
     savereq(r,"out3.html")
 
 
@@ -265,7 +296,22 @@ function download(lonrange,latrange,timerange,varname,email,basedir)
         "probe_name" => probe_name))
     savereq(r,"out4.html")
 
-    #curl 'https://www.nodc.noaa.gov/cgi-bin/OC5/SELECT/dbextract.pl' -H 'Host: www.nodc.noaa.gov' -H 'User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:55.0) Gecko/20100101 Firefox/55.0' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Accept-Language: de,en-US;q=0.7,en;q=0.3' --compressed -H 'Content-Type: application/x-www-form-urlencoded' -H 'Referer: https://www.nodc.noaa.gov/cgi-bin/OC5/SELECT/dbextract.pl' -H 'DNT: 1' -H 'Connection: keep-alive' -H 'Upgrade-Insecure-Requests: 1' --data "format=net&probe_storage=none&csv_choice=csv&level=observed&xbt_corr=15&email=barth.alexander%40gmail.com&what=EXTRACT+DATA&file_name=$filename&probe_name=OSD%2CCTD%2CXBT%2CMBT%2CPFL%2CDRB%2CMRB%2CAPB%2CUOR%2CSUR%2CGLD" > out4.html
+  #   curl 'https://www.ncei.noaa.gov/access/world-ocean-database-select/bin/dbextract.pl' \
+  # -H 'Connection: keep-alive' \
+  # -H 'Cache-Control: max-age=0' \
+  # -H 'Upgrade-Insecure-Requests: 1' \
+  # -H 'Origin: https://www.ncei.noaa.gov' \
+  # -H 'Content-Type: application/x-www-form-urlencoded' \
+  # -H 'User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.141 Safari/537.36' \
+  # -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9' \
+  # -H 'Sec-Fetch-Site: same-origin' \
+  # -H 'Sec-Fetch-Mode: navigate' \
+  # -H 'Sec-Fetch-User: ?1' \
+  # -H 'Sec-Fetch-Dest: document' \
+  # -H 'Referer: https://www.ncei.noaa.gov/access/world-ocean-database-select/bin/dbextract.pl' \
+  # -H 'Accept-Language: de-BE,de;q=0.9,fr-BE;q=0.8,fr;q=0.7,en-BE;q=0.6,en;q=0.5,de-DE;q=0.4,en-US;q=0.3' \
+  # --data-raw 'format=net&probe_storage=none&csv_choice=csv&level=observed&dbflag=wod&xbt_corr=0&email=a.barth%40uliege.be&what=EXTRACT+DATA&file_name=ocldb1613769345.14246&probe_name=OSD%2CCTD%2CXBT%2CMBT%2CPFL%2CDRB%2CMRB%2CAPB%2CUOR%2CSUR%2CGLD' \
+  # --compressed
 
     # number of files available
     probes = split(probe_name,',')
