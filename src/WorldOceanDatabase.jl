@@ -462,7 +462,7 @@ function load!(dirname,indexname,varname,profiles,lons,lats,zs,times,ids)
         wodname = joinpath(dirname,@sprintf("wod_%09dO.nc",cast[i]))
 
         if !isfile(wodname)
-            warn("File $(wodname) does not exist")
+            @warn "File $(wodname) does not exist"
             continue
         end
 
