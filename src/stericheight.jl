@@ -1,8 +1,5 @@
 """
-
-    ssh=stericheight(rhoi,z,zlevel,dim::Integer=0)
-
-
+    ssh=stericheight(rhoi,z,zlevel,dim::Integer=ndims(rhoi))
 
 # Input:
 * `rhoi`: integrated density anomalies (from a call to integraterhoprime)
@@ -17,24 +14,15 @@
 Compute steric height with respect to given depth level presently provided as index , not depth
 
 """
-function stericheight(rhoi,z,zlevel,dim::Integer=0);
+function stericheight(rhoi,z,zlevel,dim::Integer=ndims(rhoi));
+    # Here simple index provided for zlevel, not depth
 
+    ind1 = [(j == dim ? (zlevel) : (:)) for j = 1:ndims(rhoi)]
 
+    # If someone wants to interpolate to arbitrary z values, look at deepestpoint
+    # to know how to deal with searching along the direction specified for the adequate levels
 
-if dim==0
-# assume depth is last dimension
-   dim=ndims(rhoi)
-end
-
-# Here simple index provided for zlevel, not depth
-
-ind1 = [(j == dim ? (zlevel) : (:)) for j = 1:ndims(rhoi)]
-
-# If someone wants to interpolate to arbitrary z values, look at deepestpoint
-# to know how to deal with searching along the direction specified for the adequate levels
-
-return -rhoi[ind1...]/1025.
-
+    return -rhoi[ind1...]/1025.
 end
 
 

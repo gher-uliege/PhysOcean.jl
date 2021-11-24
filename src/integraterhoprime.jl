@@ -1,7 +1,5 @@
 """
-
-
-    rhoi = integraterhoprime(rhop,z);
+    rhoi = integraterhoprime(rhop,z,dim=ndims(rhop))
 
 Integrates density anomalies over depth. When used with gravity, assuming gravity is independant on z,
 it can be used to calculate dynamic pressure up to a constant. Function can be used with 1D, 2D, ...
@@ -19,18 +17,12 @@ it can be used to calculate dynamic pressure up to a constant. Function can be u
 Compute vertical integral of density anomalies
 
 """
-function integraterhoprime(rhop,z,dim::Integer=0)
+function integraterhoprime(rhop,z,dim::Integer=ndims(rhop))
 
-if dim==0
-# assume depth is last dimension
-dim=ndims(rhop)
-end
-
-rhoi=similar(rhop)
-Rpre = CartesianIndices(size(rhop)[1:dim-1])
-Rpost = CartesianIndices(size(rhop)[dim+1:end])
-    
-_integraterhoprime!(rhoi, rhop, z, Rpre, size(rhop, dim), Rpost)
+    rhoi = similar(rhop)
+    Rpre = CartesianIndices(size(rhop)[1:dim-1])
+    Rpost = CartesianIndices(size(rhop)[dim+1:end])
+    _integraterhoprime!(rhoi, rhop, z, Rpre, size(rhop, dim), Rpost)
 end
 
 
@@ -45,10 +37,9 @@ end
         # Handle all other entries
         for i = 2:n
             for Ipre in Rpre
-                rhoi[Ipre, i, Ipost] =  rhoi[Ipre, i-1, Ipost] + 
+                rhoi[Ipre, i, Ipost] =  rhoi[Ipre, i-1, Ipost] +
 				  0.5*(rhop[Ipre, i, Ipost]+rhop[Ipre, i-1, Ipost])*
 				  (z[Ipre, i, Ipost]-z[Ipre, i-1, Ipost])
-				
             end
         end
     end
@@ -58,8 +49,6 @@ end
 #	end
 
 	rhoi
-	
-	
 end
 
 

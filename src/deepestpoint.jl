@@ -1,11 +1,11 @@
 """
 Get the values of f which in direction dim have the hightest index where mask is true
 
-fdeep = deepestpoint(mask,f,dim=0);
+fdeep = deepestpoint(mask,f,dim=ndims(f));
 
 
 # Input:
-* mask: true for points to take into account. 
+* mask: true for points to take into account.
 * f: array in which the points are taken
 * dim: along which dimension depth is found and integral is performed. If not provided last dimension is used
 
@@ -15,21 +15,14 @@ fdeep = deepestpoint(mask,f,dim=0);
 
 
 """
-function deepestpoint(mask,f,dim::Integer=0)
+function deepestpoint(mask,f,dim::Integer=ndims(f))
+    ind1 = [(j == dim ? (1) : (:)) for j = 1:ndims(f)]
 
-if dim==0
-	# assume depth is last dimension
-	dim=ndims(f)
-end
+    fdeep = similar(f[ind1...])
 
-ind1 = [(j == dim ? (1) : (:)) for j = 1:ndims(f)]
-
-fdeep=similar(f[ind1...])
-
-
-Rpre = CartesianIndices(size(f)[1:dim-1])
-Rpost = CartesianIndices(size(f)[dim+1:end])
-n=size(f)[dim]
+    Rpre = CartesianIndices(size(f)[1:dim-1])
+    Rpost = CartesianIndices(size(f)[dim+1:end])
+    n = size(f)[dim]
 
     for Ipost in Rpost
         # Initialize the first value along the dimension
@@ -39,18 +32,16 @@ n=size(f)[dim]
         # Handle all other entries
         for i = 2:n
             for Ipre in Rpre
-                if mask[Ipre, i, Ipost] 
+                if mask[Ipre, i, Ipost]
 					fdeep[Ipre, Ipost] = f[Ipre, i , Ipost]
 				end
-				
             end
         end
     end
 
-return fdeep
-
+    return fdeep
 end
-    
+
 # Adapted from https://julialang.org/blog/2016/02/iteration
 
 
@@ -69,4 +60,3 @@ end
 #
 # You should have received a copy of the GNU General Public License along with
 # this program; if not, see <http://www.gnu.org/licenses/>.
-

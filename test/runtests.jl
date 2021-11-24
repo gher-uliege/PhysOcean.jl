@@ -1,16 +1,10 @@
 # -*- compile-command: "~/opt/julia-d5531c3995/bin/julia -e 'include("runtests.jl")'" -*-
 
-
 using PhysOcean
 
-if VERSION >= v"0.7.0-beta.0"
-    using Dates
-    using Test
-    using Statistics
-else
-    using Base.Test
-    using Compat
-end
+using Dates
+using Test
+using Statistics
 
 @testset "PhysOcean" begin
 
