@@ -1,36 +1,29 @@
 """
-    newhd = addlowtoheighdimension(ld,hd,dim=0);
+    newhd = addlowtoheighdimension(ld,hd,dim=ndims(hd));
 
 """
-function addlowtoheighdimension(ld,hd,dim::Integer=0)
+function addlowtoheighdimension(ld,hd,dim::Integer=ndims(hd))
 
-if dim==0
-	# assume depth is last dimension
-	dim=ndims(hd)
-end
+    nhd=similar(hd)
 
 
-
-nhd=similar(hd)
-
-
-Rpre = CartesianIndices(size(hd)[1:dim-1])
-Rpost = CartesianIndices(size(hd)[dim+1:end])
-n=size(hd)[dim]
+    Rpre = CartesianIndices(size(hd)[1:dim-1])
+    Rpost = CartesianIndices(size(hd)[dim+1:end])
+    n=size(hd)[dim]
 
     for Ipost in Rpost
-        
+
         for i = 1:n
             for Ipre in Rpre
-                 nhd[Ipre, i, Ipost] = hd[Ipre, i , Ipost]+ld[Ipre,Ipost]
+                nhd[Ipre, i, Ipost] = hd[Ipre, i , Ipost]+ld[Ipre,Ipost]
 			end
         end
     end
 
-return nhd
+    return nhd
 
 end
-    
+
 # Adapted from https://julialang.org/blog/2016/02/iteration
 
 
@@ -49,4 +42,3 @@ end
 #
 # You should have received a copy of the GNU General Public License along with
 # this program; if not, see <http://www.gnu.org/licenses/>.
-
