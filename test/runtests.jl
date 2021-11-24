@@ -109,7 +109,7 @@ using Statistics
           end
        end
     end
-    @test var(deepestpoint(mask,myval)-botval)==0
+    @test deepestpoint(mask,myval) ≈ botval
 
 	mask=trues(3,4,5)
 	myval=zeros(3,4,5)
@@ -124,7 +124,7 @@ using Statistics
 			end
 		end
 	end
-    @test var(addlowtoheighdimension(eta,myval)-myvals)==0
+    @test addlowtoheighdimension(eta,myval) ≈ myvals
 
 	mask=trues(3,4,5)
 	myval=zeros(3,4,5)
@@ -133,16 +133,15 @@ using Statistics
 	eta=zeros(3,4)
 	myvals=zeros(3,4,5)
 	for i=1:3
-    for j=1:4
-
-        for k=1:5
-            myval[i,j,k]=i+j
-            myvali[i,j,k]=(i+j)*k
-            zval[i,j,k]=k
+        for j=1:4
+            for k=1:5
+                myval[i,j,k]=i+j
+                myvali[i,j,k]=(i+j)*k
+                zval[i,j,k]=k
+            end
         end
-    end
 	end
-	@test var(integraterhoprime(myval,zval)-myvali)==0
+	@test integraterhoprime(myval,zval) ≈ myvali
 
 	mask=trues(3,4,5)
 	myval=zeros(3,4,5)
@@ -159,7 +158,7 @@ using Statistics
         end
 	end
 
-	@test var(stericheight(myval,zval,3)*1025.0+myval[:,:,3])==0
+	@test stericheight(myval,zval,3)*1025.0+myval[:,:,3] ≈ 0
 
 
 	myval=zeros(3,4,5)
