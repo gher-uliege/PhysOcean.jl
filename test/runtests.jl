@@ -158,7 +158,7 @@ using Statistics
         end
 	end
 
-	@test stericheight(myval,zval,3)*1025.0+myval[:,:,3] ≈ 0
+	@test stericheight(myval,zval,3)*1025.0+myval[:,:,3] ≈ zeros(3,4)
 
 
 	myval=zeros(3,4,5)
