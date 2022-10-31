@@ -351,7 +351,7 @@ function download(lonrange,latrange,timerange,varname,email,basedir)
         sleep(10)
     end
 
-    # make sure that file are complet
+    # make sure that file are complete
     sleep(2)
 
     mkpath(basedir)
