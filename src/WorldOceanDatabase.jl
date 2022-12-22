@@ -83,8 +83,8 @@ function getinputs(doc)
                     data[a["name"]] = a["value"]
                     #@show a["name"],a["value"]
                 end
-            end;
-        end;
+            end
+        end
     end
     return data
 end
@@ -231,6 +231,7 @@ function download(lonrange,latrange,timerange,varname,email,basedir)
     doc = Gumbo.parsehtml(r)
     data = getinputs(doc)
 
+    # repeat request until file_name is defined
     while !("file_name" in keys(data))
         sleep(10)
         r = post(URL; data = data)
@@ -238,28 +239,12 @@ function download(lonrange,latrange,timerange,varname,email,basedir)
         data = getinputs(doc)
     end
 
-    data = Dict{String,String}("what" => "DOWNLOAD DATA")
+    @debug "Response to request out2 " data
 
-    for elem in PreOrderDFS(doc.root);
-        if isa(elem,Gumbo.HTMLElement);
-            if Gumbo.tag(elem) == :input
-
-                a = Gumbo.attrs(elem);
-                if "name" in keys(a)
-
-                    if a["name"]  in ["file_name","probe_name","query_results"]
-                        data[a["name"]] = a["value"]
-                        #@show a["name"],a["value"]
-                    end
-
-                end
-            end;
-        end;
-    end
+    data["what"] = "DOWNLOAD DATA"
 
     file_name = data["file_name"]
     probe_name = data["probe_name"]
-
 
     # confirm
     #<form action="/cgi-bin/OC5/SELECT/dbextract.pl" method="post">
@@ -271,21 +256,24 @@ function download(lonrange,latrange,timerange,varname,email,basedir)
 
     #filename=$(grep 'input type="hidden" name="file_name"' out2.html | awk -F\" '{ print $6 }')
 
+    @debug begin
+        println("Payload for request out3 ")
+        display(data);
+    end
 
     r = post(URLextract; data = data)
     #curl 'https://www.nodc.noaa.gov/cgi-bin/OC5/SELECT/dbextract.pl' -H 'Host: www.nodc.noaa.gov' -H 'User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:55.0) Gecko/20100101 Firefox/55.0' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Accept-Language: de,en-US;q=0.7,en;q=0.3' --compressed -H 'Content-Type: application/x-www-form-urlencoded' -H 'Referer: https://www.nodc.noaa.gov/cgi-bin/OC5/SELECT/dbsearch.pl' -H 'DNT: 1' -H 'Connection: keep-alive' -H 'Upgrade-Insecure-Requests: 1' --data "what=DOWNLOAD+DATA&file_name=$filename&probe_name=OSD%2CCTD%2CXBT%2CMBT%2CPFL%2CDRB%2CMRB%2CAPB%2CUOR%2CSUR%2CGLD&query_results=%3A$yearstart%3A$yearend%3A1%3A1%3A1%3A1%3A$west%3A$east%3A$north%3A$south%3AOSD%2CCTD%2CXBT%2CMBT%2CPFL%2CDRB%2CMRB%2CAPB%2CUOR%2CSUR%2CGLD%3A%3A%3A$tem%3A%3A%3A%3A%3A%3A%3A%3A%3A%3A" > out3.html
 
     savereq(r,"out3.html")
 
-
     ## choose format and correction
     # here 15: Chen 2014
-
 
     r = post(URLextract; data = Dict(
         # net: single cast netcdf files
         # nrc: ragged netcdf files
         "format" => "net",
+        "dbflag" => "wod",
         "probe_storage" => "none",
         "csv_choice" => "csv",
         "level" => "observed",
