@@ -20,27 +20,29 @@ const OMEGA = 7.2921150E-5
 # mean radius of earth  (A.E. Gill, 1982. Atmosphere-Ocean Dynamics)
 const MEAN_RADIUS_EARTH = 6371000 # m
 
-function nansum(x)
-    return sum(x[.!isnan.(x)])
+function nanmean(x::AbstractArray{T}) where {T<:Number}
+    sum = zero(T)
+    count = 0
+    for i in eachindex(x)
+        if !isnan(x[i])
+            sum += x[i]
+            count += 1
+        end
+    end
+    return sum / count
 end
 
-function nansum(x,dim)
-    m = isnan.(x)
-    x2 = copy(x)
-    x2[m] .= 0
-    return sum(x2,dims = dim)
+function nanmean(x::AbstractArray{T}, dims) where {T<:Number}
+    return mapslices(nanmean, x; dims=dims)
 end
 
-function nanmean(x)
-    return mean(x[.!isnan.(x)])
+
+function nansum(arr::AbstractArray{T}) where {T<:Number}
+    return (sum(x -> !isnan(x) * x, arr))
 end
 
-function nanmean(x,dim)
-    m = isnan.(x)
-    x2 = copy(x)
-    x2[m] .= 0
-
-    return sum(x2,dims = dim) ./ sum(.!m,dims = dim)
+function nansum(arr::AbstractArray{T}, dims) where {T<:Number}
+    return (sum(x -> !isnan(x) * x, arr, dims=dims))
 end
 
 
@@ -52,7 +54,7 @@ Return DateTime from matlab's and octave's datenum
 function datetime_matlab(datenum)
     # even if datenum is Int32, the computations must be done with Int64 to
     # prevent overflow
-    return DateTime(1970,1,1) + Dates.Millisecond(round(Int64,(datenum-Int64(719529)) * 24*60*60*1000))
+    return DateTime(1970, 1, 1) + Dates.Millisecond(round(Int64, (datenum - Int64(719529)) * 24 * 60 * 60 * 1000))
 end
 
 
@@ -68,22 +70,22 @@ the relative humidity `r` (0 ≤ r ≤ 1, pressure ratio, not percentage),
 the wind speed `w` (m/s)
 and the air pressure (hPa).
 """
-function latentflux(Ts,Ta,r,w,pa)
+function latentflux(Ts, Ta, r, w, pa)
 
 
-    Da = 1.5e-3;
-    rhoa = 1.3; # kg m-3
-    Lh = 2.5e6; # J
-    epsilon = 0.622;
+    Da = 1.5e-3
+    rhoa = 1.3 # kg m-3
+    Lh = 2.5e6 # J
+    epsilon = 0.622
 
-    esta = vaporpressure(Ta);
-    ests = vaporpressure(Ts);
+    esta = vaporpressure(Ta)
+    ests = vaporpressure(Ts)
 
-    qqa = r * esta * epsilon / pa;
-    qqs = ests * epsilon / pa;
+    qqa = r * esta * epsilon / pa
+    qqs = ests * epsilon / pa
 
 
-    Qe = Da * rhoa * abs(w) * (qqs-qqa) * Lh;
+    Qe = Da * rhoa * abs(w) * (qqs - qqa) * Lh
 
     return Qe
 end
@@ -96,16 +98,16 @@ the sea surface temperature `Ts` (degree Celsius),
 the air temperature `Ta` (degree Celsius),
 the wate vapour pressure `e` (hPa) and the total cloud coverage `ttc` (0 ≤ tcc ≤ 1).
 """
-function longwaveflux(Ts,Ta,e,tcc)
-    epsilon = 0.98;
-    sigma = 5.67e-8;
-    lambda = 0.69;
+function longwaveflux(Ts, Ta, e, tcc)
+    epsilon = 0.98
+    sigma = 5.67e-8
+    lambda = 0.69
 
     # degree C to degree K
     Ts = Ts + TK
     Ta = Ta + TK
 
-    Qb = epsilon * sigma  * Ts^4 * (0.39-0.05*sqrt(e))*(1-lambda*tcc^2)+4 * epsilon * sigma * Ts^3 *(Ts-Ta)
+    Qb = epsilon * sigma * Ts^4 * (0.39 - 0.05 * sqrt(e)) * (1 - lambda * tcc^2) + 4 * epsilon * sigma * Ts^3 * (Ts - Ta)
 
     return Qb
 end
@@ -118,12 +120,12 @@ the wind speed `w` (m/s),
 the sea surface temperature `Ts` (degree Celsius),
 the air temperature `Ta` (degree Celsius).
 """
-function sensibleflux(Ts,Ta,w)
-    Sta = 1.45e-3;
-    ca = 1000;
-    rhoa = 1.3;
+function sensibleflux(Ts, Ta, w)
+    Sta = 1.45e-3
+    ca = 1000
+    rhoa = 1.3
 
-    Qc = Sta * ca * rhoa * w * (Ts-Ta);
+    Qc = Sta * ca * rhoa * w * (Ts - Ta)
 
     return Qc
 end
@@ -133,8 +135,8 @@ end
 
 Compute the solar heat flux (W/m²)
 """
-function solarflux(Q,al)
-    Qs = Q*(1-al)
+function solarflux(Q, al)
+    Qs = Q * (1 - al)
     return Qs
 end
 
@@ -148,7 +150,7 @@ Monteith, J.L., and Unsworth, M.H. 2008. Principles of Environmental Physics. Th
 """
 function vaporpressure(T)
     # Monteith and Unsworth (2008), https://en.wikipedia.org/wiki/Tetens_equation
-    e = 6.1078 * exp((17.27 * T)./(T + 237.3));
+    e = 6.1078 * exp((17.27 * T) ./ (T + 237.3))
     return e
 end
 
@@ -159,9 +161,9 @@ end
 Return a Gaussian window with `N` points with a standard deviation of
 (N-1)/(2 α).
 """
-function gausswin(N, α = 2.5)
-    sigma = (N-1)/(2 * α)
-    return [exp(- n^2 / (2*sigma^2)) for n = -(N-1)/2:(N-1)/2]
+function gausswin(N, α=2.5)
+    sigma = (N - 1) / (2 * α)
+    return [exp(-n^2 / (2 * sigma^2)) for n = -(N - 1)/2:(N-1)/2]
 end
 
 """
@@ -169,19 +171,19 @@ end
 
 Filter the vector `x` with a `N`-point Gaussian window.
 """
-function gaussfilter(x,N)
-    b = gausswin(N);
-    c = b/sum(b);
-    imax = size(x,1);
+function gaussfilter(x, N)
+    b = gausswin(N)
+    c = b / sum(b)
+    imax = size(x, 1)
     xf = zeros(imax)
-    s=1;
+    s = 1
 
-    for i=1:imax
-        xf[i] = sum(x[s:s+N-1] .* c);
+    for i = 1:imax
+        xf[i] = sum(x[s:s+N-1] .* c)
 
-        s = s+1;
-        if s>=size(x,1)-N
-            s=size(x,1)-N;
+        s = s + 1
+        if s >= size(x, 1) - N
+            s = size(x, 1) - N
         end
     end
 
@@ -194,7 +196,7 @@ end
 Provides coriolisfrequency et given latidudes in DEGREES from -90 Southpole to +90 Northpole
 """
 function coriolisfrequency(latitude)
-    return 2*OMEGA*sind(latitude)
+    return 2 * OMEGA * sind(latitude)
 end
 
 """
@@ -203,9 +205,9 @@ end
 Provides gravity in m/s2 at ocean surface at given latidudes in DEGREES from -90 Southpole to +90 Northpole
 """
 function earthgravity(latitude)
-    return 9.780327*(1.0026454-0.0026512*
-	         cosd(2*latitude)+0.0000058*(cosd(2*latitude))^2
-	)
+    return 9.780327 * (1.0026454 - 0.0026512 *
+                                   cosd(2 * latitude) + 0.0000058 * (cosd(2 * latitude))^2
+    )
 end
 
 
@@ -237,7 +239,7 @@ end
 #     return (m,eofs,relvar,totvar)
 # end
 
-function addprefix!(prefix,obsids)
+function addprefix!(prefix, obsids)
     if prefix == ""
         return
     end
