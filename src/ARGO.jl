@@ -70,8 +70,8 @@ function loadgood(T,fillvalue,ds,varname, qualityflags;
 #                   varname_adjusted_qc = varname_adjusted * "_QC"
 
     ncvar = ds[varname]
-    data = ncvar[:]
-    data_qc = ds[varname_qc].var[:]
+    data = Array(ncvar)
+    data_qc = Array(ds[varname_qc].var)
 
     if haskey(ds,varname_adjusted)
         data_adjusted = ds[varname_adjusted][:]
@@ -137,7 +137,7 @@ function load(::Type{T},filename::TS,varname,qualityflags) where TS <: AbstractS
         obstime = loadgoodreshape(DateTime,fillvalueDT,ds,ncname, qualityflags,sz,dn,varname_qc = ncname * "_QC")
 
         #obsids = fill(replace(basename(filename),".nc" => ""), size(obsvalue))
-        dc_reference = ds["DC_REFERENCE"].var[:] :: Array{Char,2}
+        dc_reference = Array(ds["DC_REFERENCE"].var) :: Array{Char,2}
         nlevels = ds.dim["N_LEVELS"]::Int
         obsids = repeatobsid(dc_reference,nlevels)
 

@@ -1,5 +1,3 @@
-# -*- compile-command: "~/opt/julia-d5531c3995/bin/julia -e 'include("runtests.jl")'" -*-
-
 using PhysOcean
 
 using Dates

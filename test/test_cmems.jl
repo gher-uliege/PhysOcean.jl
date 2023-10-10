@@ -1,4 +1,5 @@
 using Test
+using PhysOcean
 
 # mock implementation for testing downloading
 function mockdownload(URL,localname = tempname())

@@ -268,10 +268,10 @@ function loadvar(ds,param;
         return T[]
     end
 
-    data = nomissing(ds[param][:],fillvalue)
+    data = nomissing(Array(ds[param]),fillvalue)
 
     if qfname in ds
-        qf = ds[qfname].var[:]
+        qf = Array(ds[qfname].var)
 
         keep_data = falses(size(qf))
 
