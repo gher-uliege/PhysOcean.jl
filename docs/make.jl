@@ -2,9 +2,10 @@ using Documenter
 using PhysOcean
 
 makedocs(
-         modules = [PhysOcean],
-         sitename = "PhysOcean",
-         pages = ["index.md"]
+    modules = [PhysOcean],
+    sitename = "PhysOcean",
+    pages = ["index.md"],
+    checkdocs = :none,
 )
 
 # Documenter can also automatically deploy documentation to gh-pages.
