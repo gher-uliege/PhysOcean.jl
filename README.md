@@ -3,7 +3,6 @@
 [![Build Status](https://github.com/gher-uliege/PhysOcean.jl/workflows/CI/badge.svg)](https://github.com/gher-uliege/PhysOcean.jl/actions)
 [![Build Status Windows](https://ci.appveyor.com/api/projects/status/github/gher-uliege/PhysOcean.jl?branch=master&svg=true)](https://ci.appveyor.com/project/Alexander-Barth/physocean-jl)
 [![codecov.io](http://codecov.io/github/gher-uliege/PhysOcean.jl/coverage.svg?branch=master)](http://codecov.io/github/gher-uliege/PhysOcean.jl?branch=master)
-
 [![documentation stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://gher-uliege.github.io/PhysOcean.jl/stable/)
 [![documentation latest](https://img.shields.io/badge/docs-latest-blue.svg)](https://gher-uliege.github.io/PhysOcean.jl/latest/)
 
