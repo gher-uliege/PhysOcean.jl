@@ -444,7 +444,6 @@ function load!(dirname,indexname,varname,profiles,lons,lats,zs,times,ids)
     # page 39, doi:10.7289/V5DF6P53
     accepted = 0
 
-
     for i = 1:length(cast)
         id = @sprintf("wod_%09dO",cast[i])
         wodname = joinpath(dirname,@sprintf("wod_%09dO.nc",cast[i]))
@@ -455,17 +454,16 @@ function load!(dirname,indexname,varname,profiles,lons,lats,zs,times,ids)
         end
 
         NCDatasets.Dataset(wodname) do nc
-            #@show wodname, varname in nc
-            if varname in nc
+            if haskey(nc,varname)
+                profile = nc[varname] |> Array
+                z = nc["z"] |> Array
 
-                profile = nc[varname][:]
-                z = nc["z"][:]
-                lon = nc["lon"][:]
-                lat = nc["lat"][:]
-                time = nc["time"][:]
+                lon = nc["lon"] |> Array
+                lat = nc["lat"] |> Array
+                time = nc["time"] |> Array
 
-                profileflag = nc["$(varname)_WODflag"][:]
-                sigfigs = nomissing(nc["$(varname)_sigfigs"][:])
+                profileflag = nc["$(varname)_WODflag"] |> Array
+                sigfigs = nomissing(nc["$(varname)_sigfigs"] |> Array)
                 # some date are flagged as accepted but have *_sigfigs equal
                 # to zero and bogus value
 
@@ -550,6 +548,7 @@ function load(T,basedir::AbstractString,varname; prefixid = "")
             @warn "no file starting with ocldb found in directory $dirn"
         end
     end
+
     return load(T,dirnames,indexnames,varname; prefixid = prefixid)
 end
 
