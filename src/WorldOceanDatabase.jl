@@ -9,6 +9,8 @@ using Missings
 using Printf
 using Dates
 import PhysOcean: addprefix!
+using Tar
+using CodecZlib
 
 """
     extracttar(tarname,dirname)
@@ -16,15 +18,8 @@ import PhysOcean: addprefix!
 `tarname` is a tar.gz file to be extract to `dirname`.
 """
 function extracttar(tarname,dirname)
-    if Sys.iswindows()
-        exe7z = joinpath(Sys.BINDIR, "7z.exe")
-        if isdefined(Base, :LIBEXECDIR)
-            exe7z = joinpath(Sys.BINDIR, Base.LIBEXECDIR, "7z.exe")
-        end
-
-        run(pipeline(`$exe7z x $tarname -y -so`, `$exe7z x -si -y -ttar -o$dirname`))
-    else
-        run(`tar xzf $(tarname) --directory=$(dirname)`)
+    open(tarname) do io
+        Tar.extract(GzipDecompressorStream(io),dirname)
     end
 end
 
