@@ -4,7 +4,7 @@ keywords = ["physical-oceanography", "sea-water", "julia", "density", "fluxes", 
 license = "LGPL"
 desc = "Utility functions for physical oceanography"
 author = ["Alexander Barth", "Jean-Marie Beckers", "Charles Troupin", "Aida Alvera Azcarate"]
-version = "0.6.9"
+version = "0.6.10"
 
 [deps]
 AbstractTrees = "1520ce14-60c1-5f80-bbc7-55ef81b5835c"
@@ -24,11 +24,5 @@ Glob = "1"
 Gumbo = "0.5, 0.7, 0.8"
 HTTP = "0.8, 0.9, 1"
 Missings = "0.4, 1"
-NCDatasets = "0.8, 0.9, 0.10, 0.11, 0.12, 0.13, 0.14"
+NCDatasets = "0.13, 0.14"
 julia = "1"
-
-[extras]
-Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
-
-[targets]
-test = ["Test"]

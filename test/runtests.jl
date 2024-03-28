@@ -224,5 +224,6 @@ using Statistics
 
     include("test_cmems.jl")
     include("test_argo.jl")
+    include("test_wod.jl")
     include("test_tides.jl")
 end
