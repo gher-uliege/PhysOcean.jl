@@ -453,9 +453,9 @@ function load!(dirname,indexname,varname,profiles,lons,lats,zs,times,ids)
                 profile = nc[varname] |> Array
                 z = nc["z"] |> Array
 
-                lon = nc["lon"] |> Array
-                lat = nc["lat"] |> Array
-                time = nc["time"] |> Array
+                lon = nc["lon"][]
+                lat = nc["lat"][]
+                time = nc["time"][]
 
                 profileflag = nc["$(varname)_WODflag"] |> Array
                 sigfigs = nomissing(nc["$(varname)_sigfigs"] |> Array)
