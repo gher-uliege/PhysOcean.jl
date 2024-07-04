@@ -32,3 +32,15 @@ amplitude_u2,phase_u2,amplitude_v2,phase_v2 = ep2ap(semimajor, eccentricity, inc
 @test amplitude_v ≈ amplitude_v2
 @test phase_u     ≈ phase_u2
 @test phase_v     ≈ phase_v2
+
+
+
+# page 82 from
+# https://web.archive.org/web/20240626033634/https://tidesandcurrents.noaa.gov/publications/Tidal_Analysis_and_Predictions.pdf
+
+f_M2 = 12.4206
+f_S2 = 12
+Tmin = PhysOcean.rayleigh_criterion(f_M2,f_S2)
+
+# Table 3.1
+@test Tmin/24 ≈ 14.765 atol=0.001

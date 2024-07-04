@@ -99,3 +99,30 @@ function ep2ap(semimajor, eccentricity, inclination, phase)
 end
 
 export ep2ap
+
+"""
+    Tmin = PhysOcean.rayleigh_criterion(f1,f2)
+
+Compute the minimum duration `Tmin` to separate the frequency `f1` and `f2`
+following the Rayleigh criterion.
+`Tmin` has the inverse of the units of `f1` and `f2`.
+
+For example to resolve the M2 and S2 tides, the duration of the time series has
+to be at least 14.765 days:
+
+```
+using PhysOcean
+f_M2 = 12.4206 # h⁻¹
+f_S2 = 12 # h⁻¹
+Tmin = PhysOcean.rayleigh_criterion(f_M2,f_S2)
+Tmin/24
+# output 14.765
+```
+
+Reference:
+
+Bruce B. Parker, [Tidal Analysis and Prediction](https://web.archive.org/web/20240626033634/https://tidesandcurrents.noaa.gov/publications/Tidal_Analysis_and_Predictions.pdf), NOAA Special Publication NOS CO-OPS 3, page 84
+"""
+function rayleigh_criterion(f₁,f₂)
+    1/abs(1/f₁-1/f₂)
+end
