@@ -80,7 +80,9 @@ streamfunctionvolumeflux(mask::BitArray,velocities,pmnin,xiin;dim::Integer=0)
 ```@docs
 ap2ep
 ep2ap
+PhysOcean.rayleigh_criterion
 ```
+
 # Data download
 
 ## CMEMS
