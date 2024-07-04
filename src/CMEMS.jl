@@ -125,6 +125,10 @@ end
 """
     CMEMS.download(lonr,latr,timerange,param,username,password,basedir[; indexURLs = ...])
 
+The data service has been [discontinued by CMEMS](https://web.archive.org/web/20240530142808/https://marine.copernicus.eu/news/introducing-new-copernicus-marine-data-store) and replaced by a python-specific API.
+
+
+
 Download in situ data within the longitude range `lonr` (an array or tuple with
 two elements: the minimum longitude and the maximum longitude), the latitude
 range `latr` (likewise), time range `timerange` (an array or tuple with two `DateTime`
