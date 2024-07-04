@@ -13,5 +13,5 @@ makedocs(
 # for more information.
 
 deploydocs(
-    repo = "github.com/gher-ulg/PhysOcean.jl.git",
+    repo = "github.com/gher-uliege/PhysOcean.jl.git",
 )
