@@ -5,7 +5,7 @@
 [![codecov](https://codecov.io/gh/gher-uliege/PhysOcean.jl/graph/badge.svg?token=NvclfCEMyQ)](https://codecov.io/gh/gher-uliege/PhysOcean.jl)
 [![documentation stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://gher-uliege.github.io/PhysOcean.jl/stable/)
 [![documentation latest](https://img.shields.io/badge/docs-latest-blue.svg)](https://gher-uliege.github.io/PhysOcean.jl/latest/)    
-![GitHub top language](https://img.shields.io/github/languages/top/gher-uliege/Diva-Workshops)         
+![GitHub top language](https://img.shields.io/github/languages/top/gher-uliege/Diva-Workshops) [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17153349.svg)](https://doi.org/10.5281/zenodo.17153349)        
 [![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active) ![GitHub Issues or Pull Requests](https://img.shields.io/github/issues/gher-uliege/PhysOcean.jl) ![GitHub contributors](https://img.shields.io/github/contributors/gher-uliege/PhysOcean.jl) ![GitHub last commit](https://img.shields.io/github/last-commit/gher-uliege/PhysOcean.jl) 
 
 # Content
